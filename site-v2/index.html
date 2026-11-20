@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FBF6EE">
+<title>Ottle — une petite loutre pour prendre soin de toi</title>
+<meta name="description" content="Ottle est une appli de bien-être en français : une petite loutre grandit à chaque fois que tu prends soin de toi. Inscris-toi à la liste d'attente.">
+<meta property="og:title" content="Ottle — une petite loutre pour prendre soin de toi">
+<meta property="og:site_name" content="Ottle">
+<meta property="og:description" content="Une appli de bien-être en français, avec une loutre qui grandit quand tu prends soin de toi. Inscris-toi à la liste d'attente.">
+<meta property="og:image" content="images/main-dans-la-main.webp">
+<meta property="og:image:alt" content="Deux loutres qui flottent sur le dos en se tenant la main, au coucher du soleil">
+<meta name="apple-mobile-web-app-title" content="Ottle">
+<meta name="application-name" content="Ottle">
+<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="images/favicon.png">
+<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+<link rel="preload" as="image" href="images/hero-planche-mobile.webp" media="(max-width:1100px)">
+<link rel="preload" as="image" href="images/hero-planche.webp" media="(min-width:1101px)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500&family=Nunito:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Neutres chauds, teintés vers la rivière au couchant */
+    --page:#FBF6EE;
+    --page-2:#F3EADD;
+    --carte:#FFFDF9;
+    --galet:#E7D9C6;
+    --trait:rgba(43,32,24,.08);
+    --bord-champ:#D9CBB8;
+    --texte:#2B2018;
+    --texte-2:#5E5045;
+    --texte-3:#736658;
+    /* Un seul accent : le caramel de la loutre */
+    --accent:#9C5629;
+    --accent-fonce:#84471F;
+    --accent-doux:#F6E9DE;
+    --focus:#2E7770;
+    --erreur:#B3261E;
+    --courbe:cubic-bezier(.22,1,.36,1);
+    --ombre:0 8px 24px rgba(43,32,24,.07);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  html{-webkit-text-size-adjust:100%}
+  a,button,summary,label{-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--page);color:var(--texte);font-family:"Nunito",system-ui,sans-serif;font-size:18px;line-height:28px}
+  img{max-width:100%;height:auto;display:block}
+  h1,h2,h3{font-family:"Fraunces",Georgia,serif;font-weight:500;margin:0}
+  h1{font-size:clamp(40px,5.2vw,64px);line-height:1.06;letter-spacing:-.02em}
+  h2{font-size:clamp(32px,3.4vw,44px);line-height:1.12;letter-spacing:-.02em}
+  h3{font-size:22px;line-height:28px}
+  p{margin:0 0 16px}
+  p:last-child{margin-bottom:0}
+  a{color:var(--accent)}
+  .conteneur{max-width:1120px;margin:0 auto;padding:0 24px}
+  section{padding:96px 0}
+  .fond-doux{background:var(--page-2)}
+  .surtitre{display:block;font-size:16px;line-height:24px;font-weight:600;color:var(--texte-2);margin-bottom:12px}
+  .intro{color:var(--texte-2)}
+
+  /* Boutons */
+  .bouton{display:inline-flex;align-items:center;justify-content:center;height:48px;padding:0 24px;border-radius:10px;border:0;
+    background:var(--accent);color:#fff;font:600 17px/1 "Nunito",system-ui,sans-serif;text-decoration:none;cursor:pointer;
+    transition:background-color 150ms var(--courbe),transform 150ms var(--courbe)}
+  .bouton:hover{background:var(--accent-fonce)}
+  .bouton:active{transform:scale(.98)}
+  .bouton-petit{height:36px;padding:0 16px;font-size:15px}
+  .bouton-large{width:100%}
+  :focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+
+  /* Navigation */
+  .barre{position:absolute;top:0;left:0;right:0;z-index:5;padding-top:env(safe-area-inset-top)}
+  .barre .conteneur{display:flex;align-items:center;justify-content:space-between;height:72px}
+  .logo{display:flex;align-items:center;gap:12px;font-family:"Fraunces",Georgia,serif;font-weight:500;font-size:20px;color:var(--texte);text-decoration:none}
+  .logo img{width:36px;height:36px;border-radius:8px}
+
+  /* En-tête : la loutre qui fait la planche */
+  .heros{position:relative;min-height:100vh;padding:136px 0 32px;
+    background:url("images/hero-planche.webp") left top/auto 100vh no-repeat,var(--page)}
+  .heros::after{content:"";position:absolute;left:0;right:0;top:0;height:100vh;background:linear-gradient(90deg,rgba(251,246,238,0) 28%,rgba(251,246,238,.86) 50%,rgba(251,246,238,.94) 100%),linear-gradient(180deg,rgba(251,246,238,0) 70%,var(--page) 100%)}
+  .heros .conteneur{position:relative;z-index:2;display:grid;grid-template-columns:1fr 520px;column-gap:64px}
+  .heros-texte{grid-column:2;grid-row:1}
+  .heros-texte{width:520px;max-width:100%}
+  .heros-texte .surtitre{color:var(--texte)}
+  .heros-texte h1{margin-bottom:24px}
+  .heros-texte .sous-titre{font-size:20px;line-height:30px;color:var(--texte-2);margin-bottom:32px}
+  .meta{font-size:15px;line-height:20px;color:var(--texte-2);margin-top:16px}
+
+  /* Aperçu de l'appli, qui dépasse sous l'en-tête */
+  .telephone-zone{margin:48px 0 0}
+  .telephone{width:272px;border-radius:36px;padding:8px;background:#2B2018;box-shadow:0 24px 48px rgba(43,32,24,.18)}
+  .ecran{border-radius:28px;background:var(--page);padding:20px 16px 16px;font-size:14px;line-height:20px}
+  .ecran-haut{display:flex;justify-content:space-between;color:var(--texte-3);font-size:13px;margin-bottom:16px;font-variant-numeric:tabular-nums}
+  .profil{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .profil img{width:56px;height:56px;border-radius:16px}
+  .profil strong{display:block;font-family:"Fraunces",Georgia,serif;font-weight:500;font-size:18px;line-height:24px}
+  .profil span{color:var(--texte-3);font-size:13px}
+  .humeur{margin-bottom:12px}
+  .humeurs{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+  .puce{all:unset;box-sizing:border-box;height:32px;padding:0 8px;text-align:center;border-radius:8px;border:1px solid var(--trait);background:var(--carte);font-size:13px;line-height:30px;color:var(--texte-2);cursor:pointer;
+    transition:background-color 150ms var(--courbe),border-color 150ms var(--courbe),color 150ms var(--courbe)}
+  .puce:hover{background:#fff}
+  .puce:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+  .puce[aria-checked="true"]{background:var(--accent-doux);border-color:var(--accent);color:var(--texte)}
+  .energie{background:var(--carte);border:1px solid var(--trait);border-radius:12px;padding:12px;margin-bottom:16px}
+  .energie-tete{display:flex;justify-content:space-between;font-weight:600;margin-bottom:8px;font-variant-numeric:tabular-nums}
+  .energie-tete span:last-child{font-weight:400;color:var(--texte-3)}
+  .jauge{height:8px;border-radius:4px;background:var(--page-2);overflow:hidden}
+  .jauge span{display:block;height:100%;border-radius:4px;background:var(--accent);transition:width 300ms var(--courbe)}
+  .ecran-titre{font-weight:600;margin:0 0 8px}
+  .taches{list-style:none;margin:0 0 12px;padding:0;display:grid;gap:4px}
+  .tache{all:unset;box-sizing:border-box;width:100%;display:flex;align-items:center;gap:12px;min-height:40px;padding:0 12px;border-radius:10px;background:var(--carte);border:1px solid var(--trait);cursor:pointer;color:var(--texte);
+    transition:background-color 150ms var(--courbe),color 150ms var(--courbe)}
+  .tache:hover{background:#fff}
+  .tache:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+  .case{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--bord-champ);flex:none;display:flex;align-items:center;justify-content:center;transition:background-color 150ms var(--courbe),border-color 150ms var(--courbe)}
+  .tache[aria-pressed="true"]{color:var(--texte-3)}
+  .tache[aria-pressed="true"] .case{background:var(--accent);border-color:var(--accent);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5.5 10.5l3 3 6-7' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-size:16px;background-position:center;background-repeat:no-repeat}
+  .aventure{display:flex;gap:8px;align-items:flex-start;color:var(--texte-2);font-size:13px;line-height:18px;padding:4px 4px 0}
+  .aventure::before{content:"";flex:none;width:18px;height:15px;margin-top:2px;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 40'%3E%3Cpath d='M22 3c12-1 23 5 24 16 1 10-8 18-21 18C11 37 2 30 2 20 2 10 10 4 22 3z' fill='%23E7D9C6'/%3E%3C/svg%3E") center/contain no-repeat}
+
+  /* Pour qui */
+  .pour-qui{grid-column:1;grid-row:1;align-self:end;padding-bottom:96px}
+  .pour-qui p{font-family:"Fraunces",Georgia,serif;font-size:28px;line-height:38px;letter-spacing:-.01em;max-width:560px;margin:0}
+  .pour-qui span{display:block;font-family:"Nunito",system-ui,sans-serif;font-size:17px;line-height:26px;color:var(--texte-2);margin-top:16px;letter-spacing:0}
+
+  /* Rencontre */
+  .duo{display:grid;grid-template-columns:1.1fr 1fr;gap:64px;align-items:center}
+  .duo h2{margin-bottom:24px}
+  .image-douce{border-radius:16px;box-shadow:var(--ombre);width:100%;object-fit:cover}
+
+  /* Étapes, avec le galet comme repère */
+  .tete{max-width:640px;margin-bottom:48px}
+  .tete h2{margin-bottom:0}
+  .etapes{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;list-style:none;margin:0;padding:0}
+  .galet{display:inline-flex;align-items:center;justify-content:center;width:48px;height:40px;margin-bottom:16px;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 40'%3E%3Cpath d='M22 3c12-1 23 5 24 16 1 10-8 18-21 18C11 37 2 30 2 20 2 10 10 4 22 3z' fill='%23EBCBA6'/%3E%3C/svg%3E") center/contain no-repeat;
+    font-family:"Fraunces",Georgia,serif;font-size:18px;line-height:1;color:var(--texte)}
+  .etapes h3{margin-bottom:8px}
+  .etapes p{color:var(--texte-2)}
+
+  /* Carte postale du soir */
+  .carte-postale-zone{display:grid;grid-template-columns:1fr 1.25fr;gap:64px;align-items:center;margin-top:64px;padding-top:48px;border-top:1px solid var(--trait)}
+  .carte-postale-zone h3{margin-bottom:12px}
+  .carte-postale-zone > div p{color:var(--texte-2)}
+  .carte-postale{margin:0;display:grid;grid-template-columns:240px 1fr;background:var(--carte);border:1px solid var(--trait);border-radius:16px;box-shadow:var(--ombre);overflow:hidden;transform:rotate(-1deg)}
+  .carte-carte{position:relative;background:#A8DC8A;border-right:1px dashed var(--bord-champ);min-height:320px}
+  .carte-carte svg{display:block;width:100%;height:100%;position:absolute;inset:0;overflow:hidden}
+  .carte-legende{position:absolute;left:12px;top:12px;font-size:12px;line-height:16px;color:var(--texte);background:rgba(255,253,249,.92);border-radius:8px;padding:4px 8px}
+  .carte-texte{padding:24px}
+  .carte-date{display:block;font-size:13px;line-height:20px;color:var(--texte-3);margin-bottom:8px}
+  .carte-texte p{font-family:"Fraunces",Georgia,serif;font-size:18px;line-height:28px;color:var(--texte);margin-bottom:8px}
+  .carte-texte .carte-signature{font-size:16px;color:var(--texte-2);margin-bottom:16px}
+  .carte-texte .carte-signature::before{content:"— "}
+  .carte-texte .carte-question{font-family:"Nunito",system-ui,sans-serif;font-size:15px;line-height:22px;font-weight:600;background:var(--page-2);border-radius:10px;padding:8px 12px;margin-bottom:12px}
+  .carte-galet{display:flex;align-items:center;gap:8px;font-size:13px;line-height:20px;color:var(--texte-2)}
+  .carte-galet::before{content:"";width:18px;height:15px;flex:none;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 40'%3E%3Cpath d='M22 3c12-1 23 5 24 16 1 10-8 18-21 18C11 37 2 30 2 20 2 10 10 4 22 3z' fill='%23DDAE7E'/%3E%3C/svg%3E") center/contain no-repeat}
+
+  .outils{margin-top:64px;padding-top:48px;border-top:1px solid var(--trait)}
+  .outils-titre{margin-bottom:32px}
+  .outils-liste{grid-template-columns:repeat(3,1fr)}
+
+  /* Aperçu de l'appli : trois écrans */
+  .apercus-tete{max-width:640px;margin-bottom:40px}
+  .apercus-tete h2{margin-bottom:16px}
+  .mention-apercu{font-size:15px;line-height:24px;color:var(--texte-2);margin:0}
+  .glisser{display:none}
+  .ecrans{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;list-style:none;margin:0;padding:0}
+  .ecrans > li{display:flex;justify-content:center}
+  .ecrans figure{margin:0;display:flex;flex-direction:column;align-items:center}
+  .ecrans .ecran{height:508px;overflow:hidden}
+  .ecrans figcaption{margin-top:24px;max-width:300px;text-align:center}
+  .ecrans figcaption h3{margin-bottom:8px}
+  .ecrans figcaption p{color:var(--texte-2);font-size:17px;line-height:26px}
+  .ecran-grand{font-family:"Fraunces",Georgia,serif;font-size:20px;line-height:26px;color:var(--texte);margin:0}
+  .ecran-sous{color:var(--texte-3);font-size:13px;line-height:18px;margin:0 0 12px}
+  .ecran-texte{color:var(--texte-2);margin:4px 0 16px}
+  .ecran-pied{color:var(--texte-3);font-size:13px;line-height:18px;text-align:center;margin:0}
+  .mini-carte{border-radius:14px;overflow:hidden;background:#B7CF8E;margin-bottom:12px}
+  .mini-carte svg{display:block;width:100%;height:auto}
+  .encart{background:var(--carte);border:1px solid var(--trait);border-radius:12px;padding:12px}
+  .encart strong{display:block;font-weight:600}
+  .encart span{display:block;color:var(--texte-3);font-size:13px;line-height:18px}
+  .photo-ecran{position:relative;border-radius:14px;overflow:hidden;margin-bottom:16px}
+  .photo-ecran img{width:100%;aspect-ratio:4/3;object-fit:cover}
+  .photo-ecran.large img{aspect-ratio:16/10;object-position:20% 40%}
+  .pastille{position:absolute;left:8px;bottom:8px;background:rgba(255,253,249,.94);border-radius:8px;padding:4px 8px;font-size:12px;line-height:16px;color:var(--texte)}
+  .ligne-titre{display:flex;justify-content:space-between;align-items:baseline}
+  .ligne-titre span{color:var(--texte-3);font-size:13px}
+  .collection{list-style:none;margin:0 0 12px;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .collection li{background:var(--carte);border:1px solid var(--trait);border-radius:10px;padding:8px 4px;text-align:center;font-size:12px;line-height:16px;color:var(--texte-2)}
+  .collection svg{display:block;width:36px;height:30px;margin:0 auto 4px}
+  .respiration{display:flex;align-items:center;gap:12px;background:var(--carte);border:1px solid var(--trait);border-radius:12px;padding:12px;margin-bottom:12px}
+  .respiration strong{display:block;font-weight:600}
+  .respiration div span{display:block;color:var(--texte-3);font-size:13px;line-height:18px}
+  .bulle-zone{width:48px;height:48px;flex:none;display:flex;align-items:center;justify-content:center}
+  .bulle{display:block;width:48px;height:48px;border-radius:50%;background:#93CBC2;animation:souffle 10s ease-in-out infinite}
+  @keyframes souffle{0%{transform:scale(.55)}40%{transform:scale(1)}100%{transform:scale(.55)}}
+
+  /* Couleurs gaies de l'appli (écrans de téléphone uniquement) */
+  .ecran{--soleil:#FFD166;--soleil-doux:#FFF4D1;--corail:#E8664A;--corail-doux:#FFE5DC;--menthe:#2A9D8F;--menthe-doux:#DCF4EF;
+    --feuille:#4FA83D;--feuille-doux:#E6F6DE;--lilas:#7E6EE0;--lilas-doux:#ECE8FF;
+    background:linear-gradient(180deg,var(--soleil-doux) 0,#FFFBF3 200px)}
+  .ecran-riviere{background:linear-gradient(180deg,var(--menthe-doux) 0,#FFFBF3 240px)}
+  .ecran-catiche{background:linear-gradient(180deg,var(--corail-doux) 0,#FFFBF3 240px)}
+  .ecran-planche{background:linear-gradient(180deg,var(--lilas-doux) 0,#FFFBF3 280px)}
+  .ecran-haut span:last-child{display:inline-flex;align-items:center;gap:4px;color:var(--texte);font-weight:600}
+  .ecran-haut span:last-child::before{content:"";width:16px;height:13px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 40'%3E%3Cpath d='M22 3c12-1 23 5 24 16 1 10-8 18-21 18C11 37 2 30 2 20 2 10 10 4 22 3z' fill='%23FFC94D'/%3E%3C/svg%3E") center/contain no-repeat}
+  .puce{border:1.5px solid transparent;background:var(--cd);color:var(--texte);display:flex;align-items:center;justify-content:center;gap:8px;line-height:29px}
+  .puce::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
+  .puce:hover{background:var(--cd);filter:brightness(.98)}
+  .puce[aria-checked="true"]{background:var(--cd);border-color:var(--c);font-weight:600}
+  .puce.bien{--c:var(--feuille);--cd:var(--feuille-doux)}
+  .puce.bof{--c:#D9A21B;--cd:var(--soleil-doux)}
+  .puce.fatigue{--c:var(--lilas);--cd:var(--lilas-doux)}
+  .puce.stress{--c:var(--corail);--cd:var(--corail-doux)}
+  .energie{background:var(--soleil-doux);border-color:#FFE29A}
+  .jauge{background:rgba(255,255,255,.85)}
+  .jauge span{background:#FF8B6B}
+  .taches li:nth-child(1){--c:var(--menthe)} .taches li:nth-child(2){--c:var(--corail)}
+  .taches li:nth-child(3){--c:var(--lilas)} .taches li:nth-child(4){--c:var(--feuille)}
+  .case{border-color:var(--c)}
+  .tache[aria-pressed="true"] .case{background-color:var(--c);border-color:var(--c)}
+  .aventure::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 40'%3E%3Cpath d='M22 3c12-1 23 5 24 16 1 10-8 18-21 18C11 37 2 30 2 20 2 10 10 4 22 3z' fill='%23FFC94D'/%3E%3C/svg%3E")}
+  .mini-carte{background:#A8DC8A}
+  .encart{background:var(--soleil-doux);border-color:#FFE29A}
+  .ecran-catiche .encart{background:var(--menthe-doux);border-color:#BFE7DF}
+  .pastille{background:var(--soleil);font-weight:600}
+  .collection li{border-color:transparent}
+  .collection li:nth-child(1){background:var(--corail-doux)} .collection li:nth-child(2){background:#E2EEFA}
+  .collection li:nth-child(3){background:var(--feuille-doux)} .collection li:nth-child(4){background:#FBE6F0}
+  .collection li:nth-child(n+5){background:#FFFBF3;border:1px dashed #D9CBB8}
+  .respiration{background:#E2F2FF;border-color:#C8E4F7}
+  .bulle{background:#8FD3F4}
+
+  /* Ce qui rend Ottle unique */
+  .vedette{display:grid;grid-template-columns:1.3fr 1fr;gap:64px;align-items:center;margin-bottom:96px}
+  .vedette h2{margin-bottom:24px}
+  .atouts{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+  .liste{list-style:none;margin:0;padding:0;display:grid;gap:32px}
+  .liste li{display:grid;grid-template-columns:28px 1fr;gap:16px}
+  .liste li::before{content:"";width:28px;height:24px;margin-top:2px;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 40'%3E%3Cpath d='M22 3c12-1 23 5 24 16 1 10-8 18-21 18C11 37 2 30 2 20 2 10 10 4 22 3z' fill='%23DDAE7E'/%3E%3C/svg%3E") center/contain no-repeat}
+  .liste h3,.liste h4{margin-bottom:4px}
+  h4{font-family:"Fraunces",Georgia,serif;font-weight:500;font-size:22px;line-height:28px;margin:0}
+  .liste p{color:var(--texte-2)}
+
+  /* FAQ */
+  .faq{max-width:760px;display:grid;gap:8px}
+  details{background:var(--carte);border:1px solid var(--trait);border-radius:12px;padding:0 20px}
+  summary{cursor:pointer;font-weight:600;min-height:56px;padding:14px 0;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;border-radius:12px}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";font-family:"Fraunces",Georgia,serif;font-size:24px;line-height:1;color:var(--texte-3);transition:transform 180ms var(--courbe)}
+  details[open] summary::after{transform:rotate(45deg)}
+  details p{color:var(--texte-2);padding-bottom:20px}
+
+  /* Inscription */
+  .boite{max-width:600px;margin:0 auto;background:var(--carte);border:1px solid var(--trait);border-radius:20px;padding:40px;box-shadow:var(--ombre)}
+  .boite h2{text-align:center;margin-bottom:12px}
+  .boite .chapo{text-align:center;color:var(--texte-2);margin-bottom:32px}
+  label{display:block;font-weight:600;margin-bottom:8px}
+  .facultatif{font-weight:400;color:var(--texte-3)}
+  .champ{margin-bottom:20px}
+  input[type=text],input[type=email]{width:100%;height:48px;font:inherit;padding:0 16px;border-radius:10px;border:1px solid var(--bord-champ);background:#fff;color:var(--texte);
+    transition:border-color 150ms var(--courbe)}
+  input[type=text]:hover,input[type=email]:hover{border-color:var(--texte-3)}
+  fieldset{border:0;padding:0;margin:0 0 24px}
+  legend{font-weight:600;margin-bottom:12px;padding:0}
+  .choix{display:grid;gap:8px}
+  .choix label{font-weight:400;display:flex;align-items:center;gap:12px;min-height:48px;background:#fff;border:1px solid var(--bord-champ);border-radius:10px;padding:0 16px;cursor:pointer;margin:0;
+    transition:border-color 150ms var(--courbe),background-color 150ms var(--courbe)}
+  .choix label:hover{border-color:var(--texte-3)}
+  .choix label:has(input:checked){border-color:var(--accent);background:var(--accent-doux)}
+  .choix input{accent-color:var(--accent);margin:0}
+  .autre{margin-top:8px;display:none}
+  .consentement{display:flex;gap:12px;align-items:flex-start;font-weight:400;font-size:16px;line-height:24px}
+  .consentement input{margin:4px 0 0;accent-color:var(--accent);width:16px;height:16px;flex:none}
+  .erreur{color:var(--erreur);font-weight:600;font-size:16px;line-height:24px;min-height:24px;margin:8px 0 12px}
+  .mention{font-size:14px;line-height:20px;color:var(--texte-3);margin-top:20px;text-align:center}
+  .apercu{font-size:14px;line-height:20px;background:var(--page-2);border-radius:8px;padding:8px 12px;margin-bottom:24px;color:var(--texte-2);text-align:center}
+  .merci{text-align:center;display:none}
+  .merci img{width:88px;height:88px;border-radius:20px;margin:0 auto 24px}
+  .merci h2{margin-bottom:16px}
+  .merci p{color:var(--texte-2);margin-bottom:24px}
+  .merci .copie{font-size:15px;color:var(--texte-3);min-height:24px;margin-top:12px;margin-bottom:0}
+  #tally-zone iframe{width:100%;border:0}
+  #merci-titre:focus{outline:none}
+
+  .barre-cta{display:none}
+  @media (max-width:860px){
+    .barre-cta{display:block;position:fixed;left:0;right:0;bottom:0;z-index:20;padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+      background:rgba(251,246,238,.96);border-top:1px solid var(--trait);transform:translateY(110%);transition:transform 250ms var(--courbe)}
+    .barre-cta.visible{transform:none}
+    .barre-cta .bouton{width:100%}
+    footer{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+  }
+  footer{padding:32px 0 40px;text-align:center;font-size:15px;line-height:20px;color:var(--texte-3)}
+
+  /* Une seule entrée douce au chargement */
+  @keyframes monter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .heros-texte > *{animation:monter 450ms var(--courbe) both}
+  .heros-texte > :nth-child(2){animation-delay:50ms}
+  .heros-texte > :nth-child(3){animation-delay:100ms}
+  .heros-texte > :nth-child(4){animation-delay:150ms}
+
+  @media (max-width:1100px){
+    .heros{min-height:auto;background:none}
+    .heros::before{content:"";display:block;height:min(50vw,440px);background:url("images/hero-planche-mobile.webp") 20% 40%/cover no-repeat}
+    .heros::after{display:none}
+    .heros{padding:0}
+    .heros .conteneur{padding-top:32px;padding-bottom:16px;display:block}
+    .pour-qui{padding:64px 0 0}
+    .heros-texte{width:auto;max-width:640px}
+    .telephone-zone{margin:40px 0 0;display:flex;justify-content:center}
+    .carte-postale-zone{grid-template-columns:1fr;gap:32px}
+    .carte-postale{grid-template-columns:280px 1fr;max-width:720px}
+  }
+  @media (max-width:860px){
+    section{padding:64px 0}
+    body{font-size:17px;line-height:26px}
+    h1{font-size:clamp(32px,8.6vw,40px);line-height:1.08}
+    .heros .conteneur{padding-top:24px}
+    .heros-texte .surtitre{margin-bottom:8px}
+    .heros-texte h1{margin-bottom:16px}
+    .heros-texte .bouton{width:100%}
+    .meta{text-align:center}
+    .pour-qui{padding:48px 0 0}
+    .pour-qui p{font-size:24px;line-height:32px}
+    .heros-texte .sous-titre{font-size:18px;line-height:28px;margin-bottom:24px}
+    .duo,.vedette,.atouts{grid-template-columns:1fr;gap:32px}
+    .vedette{margin-bottom:64px}
+    .etapes{grid-template-columns:1fr;gap:24px}
+    .etapes li{display:grid;grid-template-columns:48px 1fr;column-gap:16px;align-items:start}
+    .etapes .galet{grid-row:span 2;margin:0}
+    .etapes h3{font-size:20px;line-height:26px}
+    .outils{margin-top:48px;padding-top:40px}
+    .carte-postale-zone{grid-template-columns:1fr;gap:32px;margin-top:48px;padding-top:40px}
+    .carte-postale{grid-template-columns:1fr;transform:none}
+    .carte-carte{height:clamp(320px,90vw,440px);min-height:0;border-right:0;border-bottom:1px dashed var(--bord-champ)}
+    .carte-carte svg{width:100%;height:100%}
+    .outils-liste{grid-template-columns:1fr}
+    .boite{padding:32px 20px}
+    .apercus-tete{margin-bottom:24px}
+    .glisser{display:block;font-size:15px;line-height:22px;color:var(--texte-3);margin:16px 0 0}
+    .ecrans-defile{overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -24px;padding:4px 24px 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+    .ecrans-defile::-webkit-scrollbar{display:none}
+    .ecrans{display:flex;gap:16px;width:max-content}
+    .ecrans > li{scroll-snap-align:center;width:272px}
+    .ecrans figcaption{margin-top:20px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    .heros-texte > *{animation:none}
+    .bouton,summary::after,.barre-cta{transition:none}
+    .bulle{animation:none;transform:scale(.8)}
+  }
+</style>
+</head>
+<body>
+
+<header class="barre">
+  <div class="conteneur">
+    <a class="logo" href="#"><img src="images/icone.webp" alt="" width="36" height="36">Ottle</a>
+    <a class="bouton bouton-petit" href="#inscription">M'inscrire</a>
+  </div>
+</header>
+
+<main>
+  <section class="heros">
+    <div class="conteneur">
+      <div class="heros-texte">
+        <span class="surtitre">Appli de bien-être mental, en français</span>
+        <h1 id="titre">Prends soin de toi. Ta loutre s'occupe du reste.</h1>
+        <p class="sous-titre">Pour les jours où prendre soin de toi demande un effort : stress, fatigue, moral en berne. Coche les petites choses que tu fais pour toi, et ta loutre grandit avec toi.</p>
+        <a class="bouton" href="#inscription">Je veux ma loutre</a>
+        <p class="meta">Gratuit · Sortie prévue en 2027</p>
+
+        <div class="telephone-zone">
+          <div class="telephone">
+            <div class="ecran" role="group" aria-label="Aperçu interactif de l'appli Ottle">
+              <div class="ecran-haut"><span>Aujourd'hui</span><span>12 galets</span></div>
+              <div class="profil">
+                <img src="images/icone.webp" alt="" width="56" height="56">
+                <div><strong>Loulou</strong><span>Bébé loutre · niveau 3</span></div>
+              </div>
+              <div class="humeur">
+                <p class="ecran-titre" id="titre-humeur">Mon humeur ce matin</p>
+                <div class="humeurs" role="radiogroup" aria-labelledby="titre-humeur">
+                  <button class="puce bien" type="button" role="radio" aria-checked="false" tabindex="-1">Bien</button>
+                  <button class="puce bof" type="button" role="radio" aria-checked="false" tabindex="-1">Bof</button>
+                  <button class="puce fatigue" type="button" role="radio" aria-checked="true" tabindex="0">Fatigue</button>
+                  <button class="puce stress" type="button" role="radio" aria-checked="false" tabindex="-1">Stress</button>
+                </div>
+              </div>
+              <div class="energie">
+                <div class="energie-tete"><span>Énergie de Loulou</span><span id="energie-txt" aria-live="polite">2 sur 4</span></div>
+                <div class="jauge"><span id="jauge" style="width:50%"></span></div>
+              </div>
+              <p class="ecran-titre">Mes petits objectifs</p>
+              <ul class="taches">
+                <li><button class="tache" type="button" aria-pressed="true"><span class="case"></span>Boire un verre d'eau</button></li>
+                <li><button class="tache" type="button" aria-pressed="true"><span class="case"></span>Sortir 5 minutes</button></li>
+                <li><button class="tache" type="button" aria-pressed="false"><span class="case"></span>Écrire ce que je ressens</button></li>
+                <li><button class="tache" type="button" aria-pressed="false"><span class="case"></span>Envoyer un message à un proche</button></li>
+              </ul>
+              <p class="aventure" id="aventure" aria-live="polite">Encore 2 objectifs et Loulou part explorer la Loire</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pour-qui">
+        <p>Pensée pour les étudiantes et étudiants à bout, les personnes TDAH, et tous les jours où tout paraît lourd.<span>Ottle ne te juge jamais et ne te punit jamais. Même les jours où tu ne coches rien.</span></p>
+      </div>
+    </div>
+  </section>
+
+
+  <section>
+    <div class="conteneur duo">
+      <img class="image-douce" src="images/galet.webp" alt="Une petite loutre assise au bord d'une rivière, qui serre un galet contre elle" width="1200" height="675" loading="lazy">
+      <div>
+        <span class="surtitre">Rencontre ta loutre</span>
+        <h2>Petite, curieuse et un peu maladroite</h2>
+        <p>Tu lui donnes un nom, tu choisis ses couleurs, et elle t'accompagne au quotidien.</p>
+        <p>Chaque petite chose que tu fais pour toi lui donne de l'énergie. Elle grandit, part explorer les rivières de France et revient avec des souvenirs à te raconter.</p>
+        <p>Les jours où tu n'y arrives pas, elle reste à côté de toi. Elle ne t'en veut jamais.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="fond-doux">
+    <div class="conteneur">
+      <div class="tete">
+        <span class="surtitre">Comment ça marche</span>
+        <h2>Une journée avec ta loutre</h2>
+      </div>
+      <ol class="etapes">
+        <li><span class="galet" aria-hidden="true">1</span><h3>Le matin, dis-lui comment tu te sens</h3><p>Un petit bilan d'humeur en quelques secondes. Ta loutre l'écoute, puis part à l'aventure.</p></li>
+        <li><span class="galet" aria-hidden="true">2</span><h3>Dans la journée, coche tes petits objectifs</h3><p>Des choses simples, que tu choisis toi-même : te lever, manger, sortir, appeler un proche. Chacune lui donne de l'énergie.</p></li>
+        <li><span class="galet" aria-hidden="true">3</span><h3>Le soir, elle revient te raconter</h3><p>Elle te partage ce qu'elle a découvert, et tu notes un bon moment de ta journée. Jour après jour, elle grandit avec toi.</p></li>
+      </ol>
+
+      <div class="carte-postale-zone">
+        <div>
+          <h3>Ses cartes postales</h3>
+          <p>Chaque soir, ta loutre te rapporte une carte postale de son aventure : un lieu de France, une petite chose de la nature, une rencontre au bord de l'eau. Parfois, une question pour toi.</p>
+          <p>Ses récits suivent ton humeur. Les jours de fatigue, elle aussi prend son temps.</p>
+        </div>
+        <figure class="carte-postale" aria-label="Exemple de carte postale envoyée par la loutre">
+          <div class="carte-carte">
+            <svg viewBox="0 0 260 320" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Carte de la Loire vue du ciel : un village, un vieux pont et un château, avec la loutre juste après le pont">
+              <defs>
+                <clipPath id="clip-loutre"><circle cx="116" cy="190" r="12"/></clipPath>
+                
+              </defs>
+              <!-- Prairie -->
+              <rect x="-400" y="-400" width="1060" height="1120" fill="#A8DC8A"/>
+              <g fill="#C6EBA3">
+                <ellipse cx="40" cy="40" rx="60" ry="34"/><ellipse cx="-90" cy="120" rx="70" ry="40"/><ellipse cx="340" cy="260" rx="70" ry="40"/><ellipse cx="120" cy="-60" rx="80" ry="30"/><ellipse cx="60" cy="400" rx="90" ry="34"/><ellipse cx="380" cy="80" rx="60" ry="34"/><ellipse cx="220" cy="210" rx="70" ry="40"/><ellipse cx="200" cy="300" rx="80" ry="30"/><ellipse cx="20" cy="190" rx="40" ry="30"/>
+              </g>
+              <g stroke="#6FB85A" stroke-width="1.5" stroke-linecap="round" fill="none">
+                <path d="M20 120 l2 -4 l2 4"/><path d="M110 40 l2 -4 l2 4"/><path d="M230 120 l2 -4 l2 4"/><path d="M200 270 l2 -4 l2 4"/><path d="M60 20 l2 -4 l2 4"/><path d="M240 250 l2 -4 l2 4"/><path d="M15 230 l2 -4 l2 4"/><path d="M180 200 l2 -4 l2 4"/>
+              </g>
+              <g fill="#FF9EC0"><circle cx="30" cy="140" r="3"/><circle cx="225" cy="140" r="3"/><circle cx="105" cy="25" r="3"/></g><g fill="#FFD166"><circle cx="40" cy="210" r="3"/><circle cx="236" cy="70" r="3"/><circle cx="20" cy="60" r="3"/></g>
+
+              <!-- Chemin du village au pont -->
+              <path d="M108 226 Q 125 248 150 262 T 205 285" fill="none" stroke="#F6DFA8" stroke-width="7" stroke-linecap="round"/>
+
+              <!-- Rivière : berge de sable, bord humide, eau, reflets -->
+              <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path id="riviere" d="M-260 460 C -170 420, -110 330, -30 310 C 50 300, 10 215, 95 195 C 150 182, 170 150, 150 115 C 130 80, 170 40, 290 30 C 370 20, 420 -60, 520 -140" stroke="#F6DFA8" stroke-width="66"/>
+                <path d="M-260 460 C -170 420, -110 330, -30 310 C 50 300, 10 215, 95 195 C 150 182, 170 150, 150 115 C 130 80, 170 40, 290 30 C 370 20, 420 -60, 520 -140" stroke="#F6DFA8" stroke-width="54"/>
+                <path d="M-260 460 C -170 420, -110 330, -30 310 C 50 300, 10 215, 95 195 C 150 182, 170 150, 150 115 C 130 80, 170 40, 290 30 C 370 20, 420 -60, 520 -140" stroke="#4FC3D0" stroke-width="48"/>
+                <path d="M-260 460 C -170 420, -110 330, -30 310 C 50 300, 10 215, 95 195 C 150 182, 170 150, 150 115 C 130 80, 170 40, 290 30 C 370 20, 420 -60, 520 -140" stroke="#4FC3D0" stroke-width="20" stroke-opacity="0"/>
+              </g>
+              <!-- Petits reflets sur l'eau -->
+              <g fill="none" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="1.6" stroke-linecap="round">
+                <path d="M22 262 q 6 -4 12 0"/><path d="M48 236 q 5 -3 10 0"/><path d="M146 160 q 5 -3 10 0"/><path d="M140 128 q 6 -4 12 0"/><path d="M168 74 q 6 -4 12 0"/><path d="M214 48 q 5 -3 10 0"/><path d="M250 36 q 5 -3 10 0"/>
+              </g>
+              <!-- Galets sur les berges -->
+              <g fill="#D9CDBA" stroke="#B9AB95" stroke-width=".8">
+                <ellipse cx="62" cy="232" rx="4" ry="3"/><ellipse cx="69" cy="236" rx="3" ry="2.2"/><ellipse cx="178" cy="132" rx="4" ry="3"/><ellipse cx="183" cy="138" rx="2.6" ry="2"/><ellipse cx="118" cy="98" rx="3.4" ry="2.6"/><ellipse cx="200" cy="80" rx="3" ry="2.2"/>
+              </g>
+              <!-- Roseaux -->
+              <g stroke="#4FA83D" stroke-width="1.6" stroke-linecap="round">
+                <path d="M58 168 v-9"/><path d="M62 170 v-12"/><path d="M66 168 v-8"/><path d="M185 104 v-9"/><path d="M189 106 v-12"/><path d="M193 104 v-8"/><path d="M8 250 v-8"/><path d="M12 252 v-11"/>
+              </g>
+
+              <!-- Le vieux pont -->
+              <g transform="rotate(-13 95 195)">
+                <rect x="84" y="158" width="22" height="76" rx="3" fill="#8C7B66" opacity=".25" transform="translate(4 4)"/>
+                <rect x="84" y="158" width="22" height="76" rx="3" fill="#D8C7A9" stroke="#A89377" stroke-width="1.2"/>
+                <rect x="87" y="158" width="16" height="76" fill="#CDBA99"/>
+                <g stroke="#B29E80" stroke-width="1"><path d="M87 172 h16"/><path d="M87 186 h16"/><path d="M87 200 h16"/><path d="M87 214 h16"/><path d="M87 228 h16"/></g>
+                <rect x="82" y="156" width="26" height="5" rx="2" fill="#BFAA88"/><rect x="82" y="231" width="26" height="5" rx="2" fill="#BFAA88"/>
+              </g>
+
+              <!-- Le village -->
+              <g>
+                <g fill="#7E6A55" opacity=".22"><rect x="153" y="266" width="24" height="18" rx="2"/><rect x="184" y="258" width="20" height="16" rx="2"/><rect x="176" y="286" width="26" height="18" rx="2"/><rect x="214" y="276" width="18" height="16" rx="2"/></g>
+                <rect x="150" y="262" width="24" height="18" rx="2" fill="#C8744A"/><path d="M150 271 h24" stroke="#A85E3A" stroke-width="1.4"/>
+                <rect x="181" y="254" width="20" height="16" rx="2" fill="#D08A5C"/><path d="M191 254 v16" stroke="#B06C44" stroke-width="1.4"/>
+                <rect x="173" y="282" width="26" height="18" rx="2" fill="#C26B42"/><path d="M173 291 h26" stroke="#A25834" stroke-width="1.4"/>
+                <rect x="211" y="272" width="18" height="16" rx="2" fill="#D3936A"/><path d="M220 272 v16" stroke="#B5754E" stroke-width="1.4"/>
+              </g>
+
+              <!-- Le château -->
+              <g>
+                <rect x="40" y="76" width="44" height="44" rx="2" fill="#7E6A55" opacity=".2" transform="translate(4 4)"/>
+                <rect x="40" y="76" width="44" height="44" rx="2" fill="#FFF3DE" stroke="#D2B98F" stroke-width="1.5"/>
+                <rect x="50" y="86" width="24" height="24" rx="1" fill="#F6E6C8"/>
+                <g fill="#E8664A" stroke="#C9553C" stroke-width="1">
+                  <circle cx="40" cy="76" r="8"/><circle cx="84" cy="76" r="8"/><circle cx="40" cy="120" r="8"/><circle cx="84" cy="120" r="8"/>
+                </g>
+                <g fill="#F7A58E"><circle cx="38" cy="74" r="2.4"/><circle cx="82" cy="74" r="2.4"/><circle cx="38" cy="118" r="2.4"/><circle cx="82" cy="118" r="2.4"/></g>
+              </g>
+
+              <!-- Arbres vus du ciel -->
+              <g>
+                <g fill="#5F8A45" opacity="0"><circle cx="214" cy="164" r="13"/><circle cx="236" cy="186" r="11"/><circle cx="222" cy="100" r="12"/><circle cx="244" cy="124" r="10"/><circle cx="18" cy="96" r="11"/><circle cx="120" cy="244" r="9"/><circle cx="104" cy="20" r="10"/><circle cx="-56" cy="44" r="12"/><circle cx="-86" cy="196" r="11"/><circle cx="314" cy="214" r="12"/><circle cx="334" cy="124" r="10"/><circle cx="124" cy="-36" r="11"/><circle cx="154" cy="374" r="12"/><circle cx="314" cy="344" r="11"/><circle cx="-36" cy="404" r="10"/></g>
+                <g fill="#7CC66A"><circle cx="210" cy="160" r="13"/><circle cx="232" cy="182" r="11"/><circle cx="218" cy="96" r="12"/><circle cx="240" cy="120" r="10"/><circle cx="14" cy="92" r="11"/><circle cx="116" cy="240" r="9"/><circle cx="100" cy="16" r="10"/><circle cx="-60" cy="40" r="12"/><circle cx="-90" cy="192" r="11"/><circle cx="310" cy="210" r="12"/><circle cx="330" cy="120" r="10"/><circle cx="120" cy="-40" r="11"/><circle cx="150" cy="370" r="12"/><circle cx="310" cy="340" r="11"/><circle cx="-40" cy="400" r="10"/></g>
+                <g fill="#9BD687"><circle cx="206" cy="155" r="5"/><circle cx="229" cy="178" r="4"/><circle cx="214" cy="91" r="4.5"/><circle cx="237" cy="116" r="3.5"/><circle cx="11" cy="88" r="4"/><circle cx="113" cy="237" r="3"/><circle cx="97" cy="12" r="3.5"/><circle cx="-64" cy="35" r="4.5"/><circle cx="-93" cy="188" r="4"/><circle cx="306" cy="205" r="4.5"/><circle cx="327" cy="116" r="3.5"/><circle cx="116" cy="-44" r="4"/><circle cx="146" cy="365" r="4.5"/><circle cx="306" cy="336" r="4"/><circle cx="-43" cy="396" r="3.5"/></g>
+              </g>
+
+              <!-- Trajet : fait (caramel) puis à venir (blanc) -->
+              <path d="M-260 460 C -170 420, -110 330, -30 310 C 50 300, 10 215, 95 195" fill="none" stroke="#FFFDF9" stroke-width="2.6" stroke-dasharray="1 6" stroke-linecap="round"/>
+              <path d="M95 195 C 150 182, 170 150, 150 115 C 130 80, 170 40, 290 30 C 370 20, 420 -60, 520 -140" fill="none" stroke="#FFFFFF" stroke-opacity=".45" stroke-width="2.4" stroke-dasharray="1 6" stroke-linecap="round"/>
+
+              <!-- La loutre -->
+              <circle cx="116" cy="190" r="15.5" fill="none" stroke="#FFC94D" stroke-width="3"/>
+              <circle cx="116" cy="190" r="14" fill="#FFFDF9"/>
+              <image href="images/icone.webp" x="104" y="178" width="24" height="24" clip-path="url(#clip-loutre)" preserveAspectRatio="xMidYMid slice"/>
+
+              <!-- Étiquettes : texte avec halo clair, lisible quelle que soit la police -->
+              <g font-family="Nunito, sans-serif" font-size="12" stroke="#FFFDF9" stroke-width="4.5" stroke-linejoin="round" paint-order="stroke">
+                <text x="62" y="146" text-anchor="middle" fill="#3B2E24" font-weight="600">Le château</text>
+                <text x="138" y="214" fill="#2B2018" font-weight="600">Le vieux pont</text>
+                <text x="190" y="250" text-anchor="middle" fill="#3B2E24" font-weight="600">Le village</text>
+              </g>
+            </svg>
+            <span class="carte-legende">La Loire · étape 3</span>
+          </div>
+          <figcaption class="carte-texte">
+            <span class="carte-date">Jeudi soir</span>
+            <p>Aujourd'hui je suis passée sous un très vieux pont. Les pierres étaient chaudes de soleil. Je me suis demandé combien de loutres étaient passées là avant moi.</p>
+            <p class="carte-signature">Loulou</p>
+            <p class="carte-question">Et toi, tu as vu quelque chose de beau aujourd'hui ?</p>
+            <span class="carte-galet">Nouveau galet : galet de Loire</span>
+          </figcaption>
+        </figure>
+      </div>
+
+      <div class="outils">
+        <h3 class="outils-titre">Et quand tu en as besoin</h3>
+        <ul class="liste outils-liste">
+          <li><div><h4>Respirer</h4><p>Des exercices de respiration guidés pour te calmer, te concentrer ou t'endormir.</p></div></li>
+          <li><div><h4>Écrire</h4><p>Un journal avec des questions simples, pour y voir plus clair et garder les bons moments.</p></div></li>
+          <li><div><h4>Suivre ton humeur</h4><p>Voir, semaine après semaine, ce qui te fait du bien et ce qui te pèse.</p></div></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="apercus" aria-labelledby="titre-apercus">
+    <div class="conteneur">
+      <div class="apercus-tete">
+        <span class="surtitre">Aperçu de l'appli</span>
+        <h2 id="titre-apercus">À quoi ressemblera Ottle</h2>
+        <p class="mention-apercu">L'appli est en cours de création : ces écrans peuvent encore évoluer.</p>
+        <p class="glisser">Fais glisser pour voir les 3 écrans</p>
+      </div>
+      <div class="ecrans-defile" role="region" aria-label="Trois écrans de l'appli Ottle">
+        <ul class="ecrans">
+
+          <li><figure>
+            <div class="telephone"><div class="ecran ecran-riviere">
+              <div class="ecran-haut"><span>Saison 1</span><span>12 galets</span></div>
+              <p class="ecran-grand">La Loire</p>
+              <p class="ecran-sous">Étape 3 sur 24</p>
+              <div class="mini-carte">
+                <svg viewBox="0 0 240 300" role="img" aria-label="Carte de la Loire : Loulou a passé les prairies et le château, elle vient de passer sous le vieux pont. Les îles de sable sont la prochaine étape.">
+                  <defs><clipPath id="clip-loutre-carte"><circle cx="94.1" cy="171.1" r="13"/></clipPath></defs>
+                  <!-- Les prairies : un pré fleuri -->
+                  <ellipse cx="44" cy="34" rx="38" ry="22" fill="#C6EBA3"/>
+                  <g stroke="#6FB85A" stroke-width="1.5" stroke-linecap="round" fill="none">
+                    <path d="M18 40 l2 -5 l2 5"/><path d="M60 22 l2 -5 l2 5"/><path d="M40 48 l2 -5 l2 5"/><path d="M68 44 l2 -5 l2 5"/>
+                  </g>
+                  <g fill="#FF9EC0"><circle cx="26" cy="26" r="3.2"/><circle cx="52" cy="38" r="3.2"/><circle cx="72" cy="30" r="3.2"/></g>
+                  <g fill="#FFD166"><circle cx="36" cy="34" r="3.2"/><circle cx="62" cy="48" r="3.2"/><circle cx="20" cy="46" r="3.2"/></g>
+                  <g fill="#FFFDF9"><circle cx="44" cy="22" r="3.2"/><circle cx="30" cy="50" r="3.2"/></g>
+                  <g fill="#E8664A"><circle cx="26" cy="26" r="1.2"/><circle cx="52" cy="38" r="1.2"/><circle cx="72" cy="30" r="1.2"/><circle cx="44" cy="22" r="1.2"/><circle cx="30" cy="50" r="1.2"/></g>
+                  <!-- Arbres et fleurs -->
+                  <g fill="#7CC66A">
+                    <circle cx="210" cy="150" r="14"/><circle cx="196" cy="166" r="9"/><circle cx="44" cy="282" r="13"/><circle cx="214" cy="40" r="11"/><circle cx="24" cy="164" r="10"/>
+                  </g>
+                  <g fill="#FF9EC0"><circle cx="200" cy="200" r="3"/><circle cx="22" cy="206" r="3"/><circle cx="220" cy="90" r="3"/><circle cx="70" cy="270" r="3"/></g>
+                  <g fill="#FFD166"><circle cx="186" cy="120" r="3"/><circle cx="208" cy="260" r="3"/><circle cx="60" cy="214" r="3"/><circle cx="62" cy="150" r="3"/></g>
+                  <!-- La rivière -->
+                  <path d="M120 -10 C 30 40, 210 90, 120 140 S 210 250, 120 310" fill="none" stroke="#F6DFA8" stroke-width="40"/>
+                  <path d="M120 -10 C 30 40, 210 90, 120 140 S 210 250, 120 310" fill="none" stroke="#4FC3D0" stroke-width="26"/>
+                  <!-- Les îles de sable -->
+                  <g fill="#F6DFA8" stroke="#E5C887" stroke-width="1">
+                    <ellipse cx="125.4" cy="228.2" rx="9" ry="4" transform="rotate(52.7 125.4 228.2)"/>
+                    <ellipse cx="145.3" cy="265.2" rx="10" ry="4.5" transform="rotate(79.3 145.3 265.2)"/>
+                  </g>
+                  <g fill="#7CC66A"><circle cx="125.4" cy="228.2" r="1.8"/><circle cx="145.3" cy="265.2" r="2"/></g>
+                  <!-- Trajet déjà parcouru, jusqu'à la loutre -->
+                  <path d="M120 -10 C 30 40, 210 90, 120 140 C 102 150, 94.8 160.4, 94.1 171.1" fill="none" stroke="#FFFDF9" stroke-width="3" stroke-dasharray="1 7" stroke-linecap="round"/>
+                  <!-- Le vieux pont, en travers de la rivière -->
+                  <g transform="rotate(46.9 104.9 150.6)">
+                    <rect x="81.9" y="145.6" width="46" height="14" rx="3" fill="#6E5A44" opacity=".2" transform="translate(2 3)"/>
+                    <rect x="81.9" y="143.6" width="46" height="14" rx="3" fill="#E9D6B0"/>
+                    <g stroke="#CDB48A" stroke-width="1"><path d="M91 145.6 v10"/><path d="M99 145.6 v10"/><path d="M107 145.6 v10"/><path d="M115 145.6 v10"/><path d="M123 145.6 v10"/></g>
+                    <rect x="81.9" y="142.6" width="46" height="3" rx="1.5" fill="#B59A72"/><rect x="81.9" y="155.6" width="46" height="3" rx="1.5" fill="#B59A72"/>
+                  </g>
+                  <!-- Le château -->
+                  <g>
+                    <rect x="40" y="86" width="44" height="28" rx="2" fill="#6E5A44" opacity=".15" transform="translate(3 3)"/>
+                    <rect x="46" y="90" width="30" height="22" fill="#FFF3DE" stroke="#D2B98F" stroke-width="1"/>
+                    <rect x="38" y="84" width="10" height="28" fill="#F6E6C8" stroke="#D2B98F" stroke-width="1"/>
+                    <rect x="74" y="84" width="10" height="28" fill="#F6E6C8" stroke="#D2B98F" stroke-width="1"/>
+                    <path d="M44 90 L61 79 L78 90 Z" fill="#F08A6C"/>
+                    <path d="M36 85 L43 71 L50 85 Z" fill="#E8664A"/><path d="M72 85 L79 71 L86 85 Z" fill="#E8664A"/>
+                    <path d="M79 71 v-7" stroke="#8C6B4E" stroke-width="1"/><path d="M79 64 l6 2 l-6 2 Z" fill="#FFD166"/>
+                    <path d="M57 112 v-6 a4 4 0 0 1 8 0 v6 Z" fill="#8C6B4E"/>
+                    <g fill="#8FB8DE"><rect x="41" y="92" width="4" height="5" rx="1"/><rect x="77" y="92" width="4" height="5" rx="1"/><rect x="52" y="95" width="4" height="5" rx="1"/><rect x="66" y="95" width="4" height="5" rx="1"/></g>
+                  </g>
+                  <!-- Étapes -->
+                  <g fill="#E8664A" stroke="#FFFDF9" stroke-width="2.5">
+                    <circle cx="97.3" cy="35" r="8"/><circle cx="144" cy="98" r="8"/>
+                  </g>
+                  <g fill="none" stroke="#FFFDF9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M93.8 35.2l2.4 2.4 4.6-5"/><path d="M140.5 98.2l2.4 2.4 4.6-5"/>
+                  </g>
+                  <circle cx="94.1" cy="171.1" r="15" fill="#FFFDF9"/>
+                  <image href="images/icone.webp" x="81.1" y="158.1" width="26" height="26" clip-path="url(#clip-loutre-carte)" preserveAspectRatio="xMidYMid slice"/>
+                  <circle cx="94.1" cy="171.1" r="15" fill="none" stroke="#FFC94D" stroke-width="3"/>
+                  <circle cx="137.4" cy="245.7" r="8" fill="#FFFDF9" stroke="#E8664A" stroke-width="2" stroke-dasharray="3 3"/>
+                  <circle cx="141.7" cy="288.4" r="7" fill="#FFFDF9" opacity=".7"/>
+                  <g font-family="Nunito, sans-serif" font-size="12" stroke="#FFFDF9" stroke-width="4.5" stroke-linejoin="round" paint-order="stroke" fill="#2B2018" font-weight="600">
+                    <text x="113" y="39">Les prairies</text>
+                    <text x="61" y="129" text-anchor="middle">Le château</text>
+                    <text x="116" y="181">Le vieux pont</text>
+                    <text x="123" y="250" text-anchor="end">Les îles de sable</text>
+                  </g>
+                </svg>
+              </div>
+              <div class="encart"><strong>Prochaine étape : les îles de sable</strong><span>Encore 2 objectifs pour y arriver</span></div>
+            </div></div>
+            <figcaption><h3>La carte de la rivière</h3><p>Chaque petite chose que tu fais pour toi fait avancer ta loutre d'une étape.</p></figcaption>
+          </figure></li>
+
+          <li><figure>
+            <div class="telephone"><div class="ecran ecran-catiche">
+              <div class="ecran-haut"><span>La catiche</span><span>12 galets</span></div>
+              <div class="photo-ecran">
+                <img src="images/catiche.webp" alt="La catiche de Loulou : un terrier douillet éclairé par une lanterne" width="1200" height="675" loading="lazy">
+                <span class="pastille">3 objets placés</span>
+              </div>
+              <div class="ligne-titre"><p class="ecran-titre">Ma collection</p><span>4 sur 24</span></div>
+              <ul class="collection">
+                <li><svg viewBox="0 0 48 40" aria-hidden="true"><path d="M22 3c12-1 23 5 24 16 1 10-8 18-21 18C11 37 2 30 2 20 2 10 10 4 22 3z" fill="#F2A65A"/></svg>Loire</li>
+                <li><svg viewBox="0 0 48 40" aria-hidden="true"><path d="M20 4c13-2 25 6 25 17 0 9-9 16-22 15C10 35 3 28 4 19 5 10 11 5 20 4z" fill="#8FB8DE"/></svg>Château</li>
+                <li><svg viewBox="0 0 48 40" aria-hidden="true"><path d="M24 4c11 0 21 6 21 15 0 11-9 17-20 17C13 36 3 29 3 19 3 10 13 4 24 4z" fill="#7CC66A"/></svg>Prairie</li>
+                <li><svg viewBox="0 0 48 40" aria-hidden="true"><circle cx="24" cy="20" r="14" fill="#F7C9DD"/><circle cx="19" cy="15" r="5" fill="#FFFDF9"/><circle cx="24" cy="20" r="14" fill="none" stroke="#D9C9D2" stroke-width="1.5"/></svg>Perle</li>
+                <li><svg viewBox="0 0 48 40" aria-hidden="true"><path d="M22 3c12-1 23 5 24 16 1 10-8 18-21 18C11 37 2 30 2 20 2 10 10 4 22 3z" fill="none" stroke="#B3A595" stroke-width="1.5" stroke-dasharray="3 3"/><text x="24" y="25" text-anchor="middle" font-family="Nunito, sans-serif" font-size="14" fill="#736658">?</text></svg>À trouver</li>
+                <li><svg viewBox="0 0 48 40" aria-hidden="true"><path d="M20 4c13-2 25 6 25 17 0 9-9 16-22 15C10 35 3 28 4 19 5 10 11 5 20 4z" fill="none" stroke="#B3A595" stroke-width="1.5" stroke-dasharray="3 3"/><text x="24" y="25" text-anchor="middle" font-family="Nunito, sans-serif" font-size="14" fill="#736658">?</text></svg>À trouver</li>
+              </ul>
+              <div class="encart"><strong>Nouvel objet : une lanterne</strong><span>À placer dans la catiche</span></div>
+            </div></div>
+            <figcaption><h3>La catiche et tes galets</h3><p>Décore la maison de ta loutre et garde un galet de chaque étape, comme un petit album.</p></figcaption>
+          </figure></li>
+
+          <li><figure>
+            <div class="telephone"><div class="ecran ecran-planche">
+              <div class="ecran-haut"><span>Mode repos</span><span>12 galets</span></div>
+              <div class="photo-ecran large">
+                <img src="images/hero-planche-mobile.webp" alt="Loulou qui flotte sur le dos, l'air paisible" width="900" height="507" loading="lazy">
+              </div>
+              <p class="ecran-grand">Loulou fait la planche</p>
+              <p class="ecran-texte">Aujourd'hui, pas d'objectifs. Tu as le droit de juste flotter : ta loutre reste avec toi.</p>
+              <div class="respiration">
+                <span class="bulle-zone" aria-hidden="true"><span class="bulle"></span></span>
+                <div><strong>Respirer avec Loulou</strong><span>Inspire 4 secondes, souffle 6 secondes</span></div>
+              </div>
+              <p class="ecran-pied">Les jours de repos comptent aussi</p>
+            </div></div>
+            <figcaption><h3>Faire la planche</h3><p>Les jours sans énergie, ta loutre flotte avec toi et ne te demande rien. Une respiration guidée reste à portée de main.</p></figcaption>
+          </figure></li>
+
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="conteneur">
+      <div class="vedette">
+        <img class="image-douce" src="images/main-dans-la-main.webp" alt="Deux loutres qui flottent sur le dos en se tenant la main, au coucher du soleil" width="1400" height="788" loading="lazy">
+        <div>
+          <span class="surtitre">Ce qui rend Ottle unique</span>
+          <h2>Se tenir la main</h2>
+          <p>Dans la nature, les loutres se tiennent la main en dormant pour ne pas dériver. Dans Ottle, tu relies ta loutre à celle d'un ami.</p>
+          <p>Un jour difficile ? Il peut te tenir la main d'un simple geste.</p>
+        </div>
+      </div>
+
+      <div class="atouts">
+        <ul class="liste">
+          <li><div><h3>Faire la planche</h3><p>Les jours sans énergie, active le mode repos. Ta loutre flotte tranquillement et ne te demande rien. Se reposer, c'est aussi prendre soin de soi.</p></div></li>
+          <li><div><h3>Les rivières de France</h3><p>Ta loutre descend la Loire, la Seine, la Dordogne… et te rapporte un galet de chaque aventure. Ta collection devient un petit album de tes progrès.</p></div></li>
+          <li><div><h3>Sa catiche</h3><p>La catiche, c'est le vrai nom de la maison de la loutre. Décore-la à ton goût, au fil des récompenses.</p></div></li>
+        </ul>
+        <img class="image-douce" src="images/catiche.webp" alt="Une loutre endormie dans sa catiche douillette, éclairée par une lanterne" width="1200" height="675" loading="lazy">
+      </div>
+
+    </div>
+  </section>
+
+  <section class="fond-doux">
+    <div class="conteneur">
+      <div class="tete"><h2>Questions fréquentes</h2></div>
+      <div class="faq">
+        <details><summary>C'est gratuit ?</summary><p>Oui. Tout ce qui sert à prendre soin de toi restera gratuit, pour toujours. Une version premium permettra de soutenir l'appli et de débloquer des petits plaisirs pour ta loutre (objets, couleurs, décorations). Les personnes inscrites sur la liste d'attente auront une offre « membre fondateur » réservée.</p></details>
+        <details><summary>C'est pour qui ?</summary><p>Pour toutes celles et ceux pour qui prendre soin de soi demande un effort : étudiantes et étudiants à bout, personnes TDAH, ou simplement les journées où tout paraît lourd.</p></details>
+        <details><summary>Est-ce que ça remplace un suivi psy ?</summary><p>Non. Ottle t'aide à prendre de bonnes habitudes au quotidien, mais ce n'est pas un outil médical. Si tu traverses un moment difficile, parles-en à un professionnel ou appelle le 3114 (numéro national de prévention du suicide, gratuit, 24h/24).</p></details>
+        <details><summary>Quand sort l'appli ?</summary><p>En 2027. Les personnes inscrites sur la liste d'attente pourront la tester en premier.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section id="inscription">
+    <div class="conteneur">
+      <div class="boite">
+
+        <h2 id="titre-inscription">Fais partie des premières personnes à adopter ta loutre</h2>
+        <p class="chapo">Laisse ton email, on te prévient dès qu'Ottle sort</p>
+
+        <!-- Si TALLY_FORM_ID est rempli (voir le script en bas), le formulaire Tally s'affiche ici à la place de l'aperçu. -->
+        <div id="tally-zone" hidden></div>
+
+        <div id="apercu-zone">
+          <p class="apercu">Mode aperçu : ce formulaire n'enregistre rien tant que Tally n'est pas branché</p>
+
+          <form id="formulaire" novalidate>
+            <div class="champ"><label for="email">Ton email</label><input id="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" required aria-describedby="erreur"></div>
+
+            <fieldset>
+              <legend>Qu'est-ce qui t'amène ? <span class="facultatif">(facultatif)</span></legend>
+              <div class="choix">
+                <label><input type="radio" name="raison" value="stress"> Le stress</label>
+                <label><input type="radio" name="raison" value="fatigue-moral"> La fatigue, le moral en berne</label>
+                <label><input type="radio" name="raison" value="tdah"> Le TDAH, l'organisation au quotidien</label>
+                <label><input type="radio" name="raison" value="curiosite"> Simple curiosité</label>
+              </div>
+            </fieldset>
+
+            <label class="consentement"><input id="consentement" type="checkbox" required aria-describedby="erreur"> J'accepte de recevoir des emails sur le lancement d'Ottle. Je peux me désinscrire à tout moment.</label>
+            <p class="erreur" id="erreur" role="alert"></p>
+            <button class="bouton bouton-large" type="submit">Je m'inscris</button>
+          </form>
+
+          <div class="merci" id="merci" role="status">
+            <img src="images/icone.webp" alt="" width="88" height="88">
+            <h2 id="merci-titre" tabindex="-1">C'est noté, ta loutre t'attend</h2>
+            <p>Tu feras partie des premières personnes prévenues du lancement, avec ton offre membre fondateur. En attendant, une loutre ne flotte jamais seule : partage Ottle à quelqu'un dont tu aimerais tenir la main.</p>
+            <button class="bouton" type="button" id="partager">Copier le lien à partager</button>
+            <p class="copie" id="copie" role="status"></p>
+          </div>
+        </div>
+
+        <p class="mention">Ton email sert uniquement à te prévenir du lancement d'Ottle. Il n'est ni vendu ni partagé. Tu peux demander sa suppression à tout moment à <a href="mailto:ottle.app@gmail.com">ottle.app@gmail.com</a>.</p>
+
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="barre-cta" id="barre-cta" aria-hidden="true">
+  <a class="bouton" href="#inscription" tabindex="-1">Je veux ma loutre</a>
+</div>
+
+<footer>
+  <div class="conteneur">Ottle · Une appli de bien-être, pas un dispositif médical · <a href="mailto:ottle.app@gmail.com">ottle.app@gmail.com</a></div>
+</footer>
+
+<script>
+  /* ============ RÉGLAGES ============
+     1. Crée ton formulaire sur tally.so, puis colle ici son identifiant
+        (la fin du lien de partage, ex. "wA1bC2" pour tally.so/r/wA1bC2).
+     2. Dans Tally, ajoute un champ caché nommé "variante" pour savoir
+        quel titre a amené chaque inscription.
+  */
+  const TALLY_FORM_ID = "ArpoAo";
+
+  /* Test A/B des titres : ajoute ?v=b ou ?v=c à l'adresse de la page. */
+  const TITRES = {
+    a: "Prends soin de toi. Ta loutre s'occupe du reste.",
+    b: "Une petite loutre pour t'aider à prendre soin de toi",
+    c: "Ici, on flotte à plusieurs"
+  };
+
+  let variante = "a";
+  try {
+    const v = new URLSearchParams(location.search).get("v");
+    if (v && TITRES[v.toLowerCase()]) variante = v.toLowerCase();
+  } catch (e) {}
+  document.getElementById("titre").textContent = TITRES[variante];
+
+  if (TALLY_FORM_ID) {
+    const zone = document.getElementById("tally-zone");
+    zone.innerHTML = '<iframe data-tally-src="https://tally.so/embed/' + TALLY_FORM_ID +
+      '?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1&variante=' + variante +
+      '" loading="lazy" height="600" title="Inscription à la liste d\'attente Ottle"></iframe>';
+    zone.hidden = false;
+    document.getElementById("apercu-zone").hidden = true;
+    const s = document.createElement("script");
+    s.src = "https://tally.so/widgets/embed.js";
+    s.onload = () => { if (window.Tally) Tally.loadEmbeds(); };
+    document.body.appendChild(s);
+  }
+
+  /* --- Aperçu de l'appli : cocher un objectif remplit la jauge --- */
+  const taches = [...document.querySelectorAll(".tache")];
+  const majEnergie = () => {
+    const faites = taches.filter(t => t.getAttribute("aria-pressed") === "true").length;
+    const reste = taches.length - faites;
+    document.getElementById("energie-txt").textContent = faites + " sur " + taches.length;
+    document.getElementById("jauge").style.width = (faites / taches.length * 100) + "%";
+    document.getElementById("aventure").textContent = reste === 0
+      ? "Jauge pleine : Loulou part explorer la Loire"
+      : "Encore " + reste + " objectif" + (reste > 1 ? "s" : "") + " et Loulou part explorer la Loire";
+  };
+  taches.forEach(t => t.addEventListener("click", () => {
+    t.setAttribute("aria-pressed", t.getAttribute("aria-pressed") === "true" ? "false" : "true");
+    majEnergie();
+  }));
+
+  const puces = [...document.querySelectorAll(".puce")];
+  const choisir = (p, focus) => {
+    puces.forEach(x => { const oui = x === p; x.setAttribute("aria-checked", oui); x.tabIndex = oui ? 0 : -1; });
+    if (focus) p.focus();
+  };
+  puces.forEach((p, i) => {
+    p.addEventListener("click", () => choisir(p));
+    p.addEventListener("keydown", e => {
+      const pas = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+      if (!pas) return;
+      e.preventDefault();
+      choisir(puces[(i + pas + puces.length) % puces.length], true);
+    });
+  });
+
+  /* --- Aperçu en 3 écrans : la zone qui défile n'est atteignable au clavier que quand elle défile (mobile) --- */
+  (() => {
+    const zone = document.querySelector(".ecrans-defile");
+    const maj = () => { if (zone.scrollWidth > zone.clientWidth + 1) zone.tabIndex = 0; else zone.removeAttribute("tabindex"); };
+    maj(); addEventListener("resize", maj);
+  })();
+
+  /* --- Barre d'inscription collante sur mobile : visible après l'en-tête, cachée près du formulaire --- */
+  (() => {
+    const barre = document.getElementById("barre-cta");
+    const lien = barre.querySelector("a");
+    if (!("IntersectionObserver" in window)) return;
+    let horsEntete = false, formVisible = false;
+    const maj = () => {
+      const montrer = horsEntete && !formVisible;
+      barre.classList.toggle("visible", montrer);
+      barre.setAttribute("aria-hidden", montrer ? "false" : "true");
+      lien.tabIndex = montrer ? 0 : -1;
+    };
+    new IntersectionObserver(([e]) => { horsEntete = !e.isIntersecting && e.boundingClientRect.top < 0; maj(); })
+      .observe(document.querySelector(".heros .bouton"));
+    new IntersectionObserver(([e]) => { formVisible = e.isIntersecting || e.boundingClientRect.top < 0; maj(); }, { rootMargin: "0px 0px -15% 0px" })
+      .observe(document.getElementById("inscription"));
+  })();
+
+  /* --- Après l'inscription : on remplace tout le bloc par le message de remerciement --- */
+  function afficherMerci() {
+    ["#titre-inscription", ".chapo", "#tally-zone", "#formulaire", ".apercu"].forEach(s => {
+      const el = document.querySelector(s); if (el) el.style.display = "none";
+    });
+    document.getElementById("apercu-zone").hidden = false;
+    document.getElementById("merci").style.display = "block";
+    document.getElementById("merci-titre").focus();
+  }
+
+  /* Tally prévient la page quand une inscription est envoyée */
+  window.addEventListener("message", e => {
+    try {
+      if (!/(^|\.)tally\.so$/.test(new URL(e.origin).hostname)) return;
+      let d = e.data;
+      if (typeof d === "string") { if (d.indexOf("Tally.FormSubmitted") === -1) return; d = JSON.parse(d); }
+      if (d && d.event === "Tally.FormSubmitted") afficherMerci();
+    } catch (err) {}
+  });
+
+  /* --- Formulaire d'aperçu (utilisé seulement sans Tally) --- */
+  const form = document.getElementById("formulaire");
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    const champEmail = document.getElementById("email");
+    const consent = document.getElementById("consentement");
+    const err = document.getElementById("erreur");
+    champEmail.removeAttribute("aria-invalid"); consent.removeAttribute("aria-invalid");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(champEmail.value.trim())) {
+      err.textContent = "Il manque une adresse email valide";
+      champEmail.setAttribute("aria-invalid", "true"); champEmail.focus(); return;
+    }
+    if (!consent.checked) {
+      err.textContent = "Coche la case pour qu'on puisse te prévenir du lancement";
+      consent.setAttribute("aria-invalid", "true"); consent.focus(); return;
+    }
+    err.textContent = "";
+    afficherMerci();
+  });
+  document.getElementById("partager").addEventListener("click", async () => {
+    const msg = document.getElementById("copie");
+    const lien = location.href.split("#")[0].split("?")[0];
+    try { await navigator.clipboard.writeText(lien); msg.textContent = "Lien copié, tu n'as plus qu'à le coller"; }
+    catch (e) { msg.textContent = "Copie ce lien : " + lien; }
+  });
+</script>
+</body>
+</html>
