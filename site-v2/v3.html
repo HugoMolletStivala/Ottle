@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ottle : l'appli où ta loutre grandit quand tu prends soin de toi</title>
+<meta name="description" content="Une appli de bien-être en français, avec une petite loutre qui grandit quand tu prends soin de toi. Inscris-toi à la liste d'attente.">
+<meta property="og:title" content="Ottle : l'appli où ta loutre grandit quand tu prends soin de toi">
+<meta property="og:site_name" content="Ottle">
+<meta property="og:description" content="Une appli de bien-être en français, avec une petite loutre qui grandit quand tu prends soin de toi. Inscris-toi à la liste d'attente.">
+<meta name="theme-color" content="#BFE3EE">
+<link rel="icon" href="images/favicon-loutre.svg" type="image/svg+xml">
+<link rel="icon" href="images/favicon-loutre-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="images/apple-touch-icon-loutre.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ciel:#BFE3EE;
+    --soleil:#FFD45C;
+    --soleil-2:#FFE59A;
+    --soleil-3:#FFF0C4;
+    --colline-1:#B5DC96;
+    --colline-2:#8DCB72;
+    --pre:#6DB35A;
+    --arbre:#4E9A4B;
+    --eau:#86D3C6;
+    --eau-2:#B4E6DD;
+    --eau-fonce:#5DB8AA;
+    --creme:#FBF6EE;
+    --creme-2:#F3EADD;
+    --carte:#FFFDF9;
+    --texte:#2B2018;
+    --texte-2:#55473B;
+    --caramel:#9C5629;
+    --caramel-fonce:#6B3A1C;
+    --contour:#5B3119;
+    --terre:#2F4F33;
+    --focus:#1F5F59;
+    --courbe:cubic-bezier(.22,1,.36,1);
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+  body{margin:0;background:var(--creme);color:var(--texte);font-family:"Nunito",system-ui,sans-serif;font-size:18px;line-height:1.55}
+  a,button,summary{-webkit-tap-highlight-color:transparent}
+  img,svg{display:block}
+  p{margin:0 0 12px}
+  h1,h2,h3{margin:0;font-weight:900;letter-spacing:-.01em}
+  :focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:12px}
+  .lien-evitement{position:absolute;left:12px;top:-60px;background:var(--carte);color:var(--texte);padding:10px 16px;border-radius:12px;z-index:50;font-weight:800}
+  .lien-evitement:focus{top:12px}
+  .visuellement-cache{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .conteneur{width:min(1080px,100% - 40px);margin-inline:auto}
+
+  /* Titres façon livre d'images : blanc, gros contour brun */
+  .titre-contour{
+    color:#fff;font-weight:900;
+    text-shadow:
+      0 0 0 var(--contour),
+      3px 0 var(--contour),-3px 0 var(--contour),0 3px var(--contour),0 -3px var(--contour),
+      2px 2px var(--contour),-2px 2px var(--contour),2px -2px var(--contour),-2px -2px var(--contour),
+      5px 0 var(--contour),-5px 0 var(--contour),0 5px var(--contour),0 -5px var(--contour),
+      4px 3px var(--contour),-4px 3px var(--contour),4px -3px var(--contour),-4px -3px var(--contour),
+      3px 4px var(--contour),-3px 4px var(--contour),3px -4px var(--contour),-3px -4px var(--contour),
+      0 9px var(--contour),4px 8px var(--contour),-4px 8px var(--contour);
+  }
+
+  /* Bouton dodu, avec une épaisseur en dessous */
+  .bouton{
+    display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:56px;padding:0 28px;
+    border-radius:999px;border:0;background:var(--caramel);color:#fff;font:900 19px/1 "Nunito",system-ui,sans-serif;
+    text-decoration:none;cursor:pointer;box-shadow:0 6px 0 var(--caramel-fonce);
+    transition:transform 120ms var(--courbe),box-shadow 120ms var(--courbe);
+  }
+  .bouton:hover{transform:translateY(2px);box-shadow:0 4px 0 var(--caramel-fonce)}
+  .bouton:active{transform:translateY(6px);box-shadow:0 0 0 var(--caramel-fonce)}
+  .bouton-clair{background:var(--carte);color:var(--texte);box-shadow:0 6px 0 #D9CBB8}
+  .bouton-clair:hover{box-shadow:0 4px 0 #D9CBB8}
+
+  /* ============ 1. La scène d'accueil ============ */
+  .scene{position:relative;background:var(--ciel);overflow:hidden;padding-top:env(safe-area-inset-top);display:flex;flex-direction:column;min-height:100vh;min-height:100svh}
+  .entete{display:flex;align-items:center;justify-content:space-between;padding:16px 0}
+  .logo{display:flex;align-items:center;gap:8px;color:var(--texte);text-decoration:none;font-weight:900;font-size:26px;letter-spacing:-.02em}
+  .logo .rond{width:44px;height:44px;border-radius:50%;background:var(--carte);display:grid;place-items:center;overflow:hidden}
+  .logo .rond svg{width:38px;height:auto}
+  .entete .bouton{min-height:44px;padding:0 18px;font-size:16px;box-shadow:0 4px 0 var(--caramel-fonce)}
+
+  .soleil{position:absolute;left:50%;top:50%;width:280px;height:280px;margin:-150px 0 0 -140px;border-radius:50%;
+    background:var(--soleil);box-shadow:0 0 0 26px var(--soleil-2),0 0 0 54px var(--soleil-3);z-index:-1}
+  .nuage{position:absolute;z-index:0;fill:#fff}
+  .nuage-1{width:190px;left:-40px;top:120px}
+  .nuage-2{width:170px;right:-50px;top:520px}
+  .nuage-3{width:140px;left:62%;top:70px;display:none}
+
+  .heros{position:relative;z-index:2;text-align:center;padding:12px 0 0;flex:1 0 auto;display:flex;flex-direction:column;justify-content:center;align-items:center}
+  .heros > *:not(.soleil){position:relative}
+  .heros h1{font-size:clamp(32px,8.4vw,60px);line-height:1.08;max-width:20ch;margin:0 auto 16px}
+  .heros .sous-titre{max-width:38ch;margin:0 auto 20px;font-size:18px;font-weight:700;color:var(--texte)}
+  .heros .meta{font-size:16px;font-weight:800;color:var(--texte);margin:14px 0 0}
+  .heros .meta span{display:inline-block;background:rgba(255,253,249,.78);border-radius:999px;padding:4px 12px}
+
+  .paysage{position:relative;z-index:1;margin-top:-10px;flex:0 0 auto;height:clamp(230px,40svh,340px)}
+  .paysage > svg.decor{position:absolute;inset:0;width:100%;height:100%}
+  .loutre-riviere{position:absolute;left:50%;bottom:16px;width:150px;margin-left:-75px;z-index:2}
+  .loutre-riviere .flotte{animation:flotte 3.6s ease-in-out infinite}
+  .eau-devant{position:absolute;left:50%;bottom:0;width:520px;margin-left:-260px;z-index:3}
+  .galet-berge{position:absolute;z-index:3;bottom:36px;left:calc(50% + 120px);width:54px}
+
+  .bras-coucou{animation:coucou 1.6s ease-in-out infinite}
+  .oeil{animation:cligne 5s infinite}
+  @keyframes flotte{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  @keyframes coucou{0%,100%{transform:rotate(0)}50%{transform:rotate(-22deg)}}
+  @keyframes cligne{0%,94%,100%{transform:scaleY(1)}96.5%{transform:scaleY(.08)}}
+  @keyframes derive{from{transform:translateX(0)}to{transform:translateX(30px)}}
+  .nuage-1,.nuage-2{animation:derive 14s ease-in-out infinite alternate}
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+  }
+
+  /* ============ 2. Une journée avec ta loutre ============ */
+  .pre{background:var(--pre);padding:8px 0 64px;position:relative}
+  .panneau{background:var(--carte);border-radius:36px;padding:32px 22px 26px;box-shadow:0 8px 0 #4E8F40}
+  .panneau h2{font-size:clamp(30px,7vw,44px);line-height:1.1;text-align:center;margin-bottom:8px}
+  .panneau .chapo{text-align:center;color:var(--texte-2);max-width:40ch;margin:0 auto 28px}
+  .etapes{list-style:none;margin:0;padding:0;display:grid;gap:18px}
+  .etape{display:grid;grid-template-columns:96px 1fr;gap:16px;align-items:center;background:var(--creme);border-radius:28px;padding:14px 18px 14px 12px}
+  .etape .medaillon{width:96px;height:96px;border-radius:46% 54% 50% 50% / 55% 50% 50% 45%;display:grid;place-items:end center;overflow:hidden}
+  .etape .medaillon svg{width:92px;height:auto;margin-bottom:-14px}
+  .matin .medaillon{background:#FFE08A}
+  .journee .medaillon{background:#B9E5A1}
+  .soir .medaillon{background:#D9C8F0}
+  .etape .moment{display:inline-block;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:var(--texte-2)}
+  .etape h3{font-size:21px;line-height:1.2;margin:2px 0 6px}
+  .etape p{font-size:16px;line-height:1.5;color:var(--texte-2);margin:0}
+
+  .carte-postale{margin:26px auto 0;max-width:560px;background:#FFF8EA;border-radius:22px;padding:20px;border:2px dashed #E3CDB0;display:grid;gap:6px}
+  .carte-postale .de{font-size:14px;font-weight:900;color:var(--caramel)}
+  .carte-postale blockquote{margin:0;font-size:18px;font-weight:700;line-height:1.5}
+  .carte-postale .signature{color:var(--texte-2);font-size:16px}
+  .carte-postale .galet-gagne{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:800;color:var(--texte-2)}
+  .galet-gagne i{width:22px;height:16px;border-radius:50%;background:var(--soleil);display:inline-block}
+
+  /* ============ 3. Ce qui rend Ottle unique ============ */
+  .berge{background:var(--creme);padding:56px 0 64px;position:relative}
+  .bord-haut{position:absolute;left:0;right:0;top:-1px;width:100%;height:34px}
+  .berge h2,.faq h2{font-size:clamp(30px,7vw,44px);line-height:1.1;text-align:center;margin-bottom:28px}
+  .atouts{list-style:none;margin:0;padding:0;display:grid;gap:16px}
+  .atout{display:grid;grid-template-columns:72px 1fr;gap:16px;align-items:start;background:var(--carte);border-radius:28px;padding:18px}
+  .atout .galet{width:72px;height:60px;border-radius:50% 50% 46% 54% / 58% 52% 48% 42%;display:grid;place-items:center}
+  .atout .galet svg{width:40px;height:40px}
+  .atout h3{font-size:20px;line-height:1.25;margin:4px 0 4px}
+  .atout p{font-size:16px;line-height:1.5;color:var(--texte-2);margin:0}
+
+  /* ============ 4. Inscription, dans l'eau ============ */
+  .riviere{background:var(--eau);padding:64px 0 72px;position:relative}
+  .inscription{position:relative;max-width:620px;margin:0 auto;background:var(--carte);border-radius:36px;padding:96px 22px 24px;box-shadow:0 8px 0 var(--eau-fonce);scroll-margin-top:96px}
+  .inscription .loutre-form{position:absolute;left:50%;top:-74px;width:140px;margin-left:-70px}
+  .inscription h2{font-size:clamp(28px,6.6vw,40px);line-height:1.12;text-align:center;margin-bottom:10px}
+  .inscription .chapo{text-align:center;color:var(--texte-2);margin-bottom:12px}
+  #tally-zone iframe{width:100%;border:0}
+  .rgpd{font-size:15px;line-height:1.5;color:var(--texte-2);margin:8px 0 0}
+  .rgpd a,footer a{color:inherit;font-weight:800}
+  .sans-tally{text-align:center;margin:12px 0}
+  #merci{display:none;text-align:center}
+  #merci svg.duo{width:min(300px,100%);margin:0 auto 8px}
+  #merci h2:focus{outline:none}
+  #copie{min-height:24px;font-size:15px;font-weight:800;color:var(--texte-2);margin-top:12px}
+  .remous{position:absolute;left:0;right:0;height:26px;width:100%}
+
+  /* ============ 5. Questions ============ */
+  .faq{background:var(--creme);padding:56px 0 64px;position:relative}
+  .faq .liste{max-width:720px;margin:0 auto;display:grid;gap:12px}
+  details{background:var(--carte);border-radius:24px;padding:0 20px}
+  summary{cursor:pointer;list-style:none;min-height:60px;display:flex;align-items:center;justify-content:space-between;gap:16px;font-weight:900;font-size:18px}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"";flex:none;width:26px;height:22px;border-radius:50%;background:var(--creme-2);box-shadow:inset 0 0 0 2px #E3D3BE;transition:background 160ms}
+  details[open] summary::after{background:var(--soleil)}
+  details p{font-size:16px;color:var(--texte-2);padding-bottom:18px;margin:0}
+
+  footer{background:var(--terre);color:#F3EADD;padding:28px 0 calc(28px + env(safe-area-inset-bottom));font-size:15px;text-align:center}
+  footer p{margin:4px 0}
+
+  /* Barre d'inscription collante (téléphone) */
+  .barre-cta{position:fixed;left:0;right:0;bottom:0;z-index:40;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--carte);box-shadow:0 -2px 0 rgba(43,32,24,.08);
+    transform:translateY(110%);transition:transform 240ms var(--courbe)}
+  .barre-cta.visible{transform:none}
+  .barre-cta .bouton{width:100%}
+
+  @media (max-height:700px) and (max-width:699px){
+    .entete{padding:10px 0}
+    .heros .sous-titre{font-size:16px;margin-bottom:14px}
+    .heros > *:not(.soleil){position:relative}
+  .heros h1{margin-bottom:10px}
+    .paysage{height:200px}
+    .loutre-riviere{width:130px;margin-left:-65px}
+  }
+  /* ============ Écrans plus larges ============ */
+  @media (min-width:700px){
+    .nuage-3{display:block}
+    .nuage-1{width:260px;left:4%;top:140px}
+    .nuage-2{width:300px;right:3%;top:230px}
+    .soleil{width:340px;height:340px;margin:-180px 0 0 -170px}
+    .paysage{height:clamp(260px,42vh,420px)}
+    .loutre-riviere{width:210px;margin-left:-105px;bottom:22px}
+    .paysage{margin-top:-30px}
+    .eau-devant{width:760px;margin-left:-380px}
+    .galet-berge{left:calc(50% + 190px);width:70px;bottom:48px}
+    .panneau{padding:44px 40px 36px}
+    .etapes{grid-template-columns:repeat(3,1fr)}
+    .etape{grid-template-columns:1fr;text-align:center;justify-items:center;padding:22px 18px}
+    .etape .medaillon{width:132px;height:132px}
+    .etape .medaillon svg{width:126px;margin-bottom:-18px}
+    .atouts{grid-template-columns:1fr 1fr}
+    .inscription{padding:104px 40px 32px}
+    .barre-cta{display:none}
+  }
+</style>
+<script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body>
+<a class="lien-evitement" href="#inscription">Aller à l'inscription</a>
+
+<header class="scene">
+  <svg class="nuage nuage-1" viewBox="0 0 200 80" aria-hidden="true" focusable="false"><path d="M20 70 C2 70 2 46 22 46 C20 26 46 18 58 32 C64 8 102 6 110 30 C122 16 150 20 150 42 C172 36 192 52 180 70Z"/></svg><svg class="nuage nuage-2" viewBox="0 0 200 80" aria-hidden="true" focusable="false"><path d="M20 70 C2 70 2 46 22 46 C20 26 46 18 58 32 C64 8 102 6 110 30 C122 16 150 20 150 42 C172 36 192 52 180 70Z"/></svg><svg class="nuage nuage-3" viewBox="0 0 200 80" aria-hidden="true" focusable="false"><path d="M20 70 C2 70 2 46 22 46 C20 26 46 18 58 32 C64 8 102 6 110 30 C122 16 150 20 150 42 C172 36 192 52 180 70Z"/></svg>
+  <div class="conteneur entete">
+    <a class="logo" href="#" aria-label="Ottle, accueil"><span class="rond" aria-hidden="true"><svg class="" viewBox="22 14 156 150" aria-hidden="true" focusable="false">
+
+<g class="tete">
+<circle cx="40" cy="66" r="12" fill="#9A5A2B"/><circle cx="160" cy="66" r="12" fill="#9A5A2B"/>
+<circle cx="41" cy="67" r="6" fill="#F2A3A6"/><circle cx="159" cy="67" r="6" fill="#F2A3A6"/>
+<path d="M172.0,94.0 L173.7,96.9 L174.5,99.9 L174.6,102.9 L174.1,105.9 L173.1,108.8 L171.6,111.5 L169.5,114.0 L166.5,116.2 L166.7,119.4 L166.0,122.4 L164.7,125.2 L162.9,127.8 L160.6,130.2 L157.8,132.2 L154.7,133.9 L150.9,135.0 L149.6,138.1 L147.5,140.6 L144.9,142.8 L142.0,144.6 L138.8,146.1 L135.3,147.2 L131.6,147.8 L127.6,147.6 L124.9,150.0 L121.7,151.7 L118.3,152.9 L114.7,153.7 L111.1,154.1 L107.3,154.0 L103.6,153.4 L100.0,152.0 L96.4,153.4 L92.7,154.0 L88.9,154.1 L85.3,153.7 L81.7,152.9 L78.3,151.7 L75.1,150.0 L72.4,147.6 L68.4,147.8 L64.7,147.2 L61.2,146.1 L58.0,144.6 L55.1,142.8 L52.5,140.6 L50.4,138.1 L49.1,135.0 L45.3,133.9 L42.2,132.2 L39.4,130.2 L37.1,127.8 L35.3,125.2 L34.0,122.4 L33.3,119.4 L33.5,116.2 L30.5,114.0 L28.4,111.5 L26.9,108.8 L25.9,105.9 L25.4,102.9 L25.5,99.9 L26.3,96.9 L28.0,94.0 L26.3,91.1 L25.5,88.1 L25.4,85.1 L25.9,82.1 L26.9,79.2 L28.4,76.5 L30.5,74.0 L33.5,71.8 L33.3,68.6 L34.0,65.6 L35.3,62.8 L37.1,60.2 L39.4,57.8 L42.2,55.8 L45.3,54.1 L49.1,53.0 L50.4,49.9 L52.5,47.4 L55.1,45.2 L58.0,43.4 L61.2,41.9 L64.7,40.8 L68.4,40.2 L72.4,40.4 L75.1,38.0 L78.3,36.3 L81.7,35.1 L85.3,34.3 L88.9,33.9 L92.7,34.0 L96.4,34.6 L100.0,36.0 L103.6,34.6 L107.3,34.0 L111.1,33.9 L114.7,34.3 L118.3,35.1 L121.7,36.3 L124.9,38.0 L127.6,40.4 L131.6,40.2 L135.3,40.8 L138.8,41.9 L142.0,43.4 L144.9,45.2 L147.5,47.4 L149.6,49.9 L150.9,53.0 L154.7,54.1 L157.8,55.8 L160.6,57.8 L162.9,60.2 L164.7,62.8 L166.0,65.6 L166.7,68.6 L166.5,71.8 L169.5,74.0 L171.6,76.5 L173.1,79.2 L174.1,82.1 L174.6,85.1 L174.5,88.1 L173.7,91.1 L172.0,94.0Z" fill="#B8743D"/>
+<path d="M88 38 C86 22 96 18 100 30 C104 16 116 22 110 38 C104 32 96 32 88 38Z" fill="#B8743D"/>
+<path d="M78 40 Q84 34 90 40" stroke="#9A5A2B" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M110 40 Q116 34 122 40" stroke="#9A5A2B" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M100 70 C88 62 70 62 56 68 C40 76 34 96 40 114 C48 134 76 142 100 142 C124 142 152 134 160 114 C166 96 160 76 144 68 C130 62 112 62 100 70Z" fill="#FBEBD3"/>
+<ellipse cx="54" cy="114" rx="12" ry="7.5" fill="#F2A3A6" opacity=".85"/><ellipse cx="146" cy="114" rx="12" ry="7.5" fill="#F2A3A6" opacity=".85"/>
+<g class="yeux"><g class="oeil" style="transform-origin:70px 90px"><circle cx="70" cy="90" r="20" fill="#2B1A12"/>
+<circle cx="70" cy="95" r="14" fill="#7A4523"/><circle cx="70" cy="93" r="9" fill="#2B1A12"/>
+<circle cx="63" cy="82" r="6.5" fill="#fff"/><circle cx="78" cy="98" r="3.2" fill="#fff"/><circle cx="73" cy="79" r="2" fill="#fff"/></g><g class="oeil" style="transform-origin:130px 90px"><circle cx="130" cy="90" r="20" fill="#2B1A12"/>
+<circle cx="130" cy="95" r="14" fill="#7A4523"/><circle cx="130" cy="93" r="9" fill="#2B1A12"/>
+<circle cx="123" cy="82" r="6.5" fill="#fff"/><circle cx="138" cy="98" r="3.2" fill="#fff"/><circle cx="133" cy="79" r="2" fill="#fff"/></g></g>
+<path d="M91 105 Q100 100 109 105 Q109 113 100 116 Q91 113 91 105Z" fill="#2B1A12"/>
+<ellipse cx="96" cy="106" rx="3" ry="1.6" fill="#fff" opacity=".7"/>
+<path d="M90 118 Q95 124 100 118 Q105 124 110 118" stroke="#2B1A12" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+<g fill="#9A5A2B"><circle cx="78" cy="116" r="1.8"/><circle cx="72" cy="121" r="1.8"/><circle cx="122" cy="116" r="1.8"/><circle cx="128" cy="121" r="1.8"/></g>
+</g>
+</svg></span>Ottle</a>
+    <a class="bouton" href="#inscription">M'inscrire</a>
+  </div>
+
+  <div class="conteneur heros">
+    <div class="soleil" aria-hidden="true"></div>
+    <h1 id="titre" class="titre-contour">L'appli où ta loutre grandit quand tu prends soin de toi</h1>
+    <p class="sous-titre">Une appli de bien-être en français, pour les jours où prendre soin de toi demande un effort.</p>
+    <a class="bouton" href="#inscription">Je veux ma loutre</a>
+    <p class="meta"><span>Gratuit · Sortie prévue en 2027</span></p>
+  </div>
+
+  <div class="paysage">
+    <svg class="decor" viewBox="0 0 1440 420" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
+<path d="M0 150 C180 90 330 110 470 150 C560 120 650 112 720 132 C820 98 980 92 1100 140 C1240 100 1360 110 1440 140 V420 H0Z" fill="var(--colline-1)"/>
+<g fill="var(--arbre)"><ellipse cx="300" cy="104" rx="16" ry="38"/><ellipse cx="332" cy="112" rx="13" ry="30"/><ellipse cx="1120" cy="98" rx="16" ry="40"/><ellipse cx="1150" cy="108" rx="12" ry="30"/><ellipse cx="560" cy="122" rx="12" ry="26"/></g>
+<g stroke="#8A5A35" stroke-width="4"><path d="M300 140v14M332 140v12M1120 136v16M1150 136v14M560 146v8"/></g>
+<path d="M0 230 C160 180 340 190 520 226 C600 214 660 208 720 214 C790 206 860 210 940 222 C1100 186 1300 184 1440 220 V420 H0Z" fill="var(--colline-2)"/>
+<g fill="#3F8A44"><circle cx="150" cy="200" r="34"/><circle cx="196" cy="208" r="26"/><circle cx="1290" cy="196" r="34"/><circle cx="1250" cy="206" r="24"/></g>
+<g stroke="#8A5A35" stroke-width="5"><path d="M150 230v18M1290 226v20"/></g>
+<path d="M0 300 C220 268 420 276 600 296 C680 290 760 290 840 296 C1020 276 1220 266 1440 296 V420 H0Z" fill="var(--pre)"/>
+<ellipse cx="720" cy="360" rx="340" ry="62" fill="var(--eau)"/>
+<ellipse cx="720" cy="360" rx="340" ry="62" fill="none" stroke="#5FA04E" stroke-width="6" opacity=".35"/>
+<g stroke="var(--eau-2)" stroke-width="5" stroke-linecap="round" fill="none"><path d="M500 352 q20 -8 40 0"/><path d="M900 368 q22 -8 44 0"/><path d="M1010 346 q16 -6 32 0"/></g>
+<g fill="#4E9A4B"><path d="M372 352 q6 -46 10 0z"/><path d="M386 356 q8 -60 12 0z"/><path d="M402 354 q4 -40 9 0z"/><path d="M1040 356 q6 -50 10 0z"/><path d="M1054 352 q8 -38 12 0z"/></g>
+<g fill="#8A5A35"><ellipse cx="387" cy="306" rx="4" ry="10"/><ellipse cx="1059" cy="318" rx="4" ry="9"/></g>
+</svg>
+    <div class="loutre-riviere"><div class="flotte"><svg class="" viewBox="0 0 200 215" aria-hidden="true" focusable="false">
+<g class="corps">
+<path d="M128 196 C170 210 182 176 176 160 C172 182 152 190 128 184Z" fill="#9A5A2B"/>
+<path d="M140.0,172.0 L140.9,174.7 L141.1,177.5 L140.7,180.3 L139.9,183.0 L138.7,185.6 L137.0,188.0 L135.0,190.2 L132.4,192.0 L131.2,194.6 L129.4,197.0 L127.2,199.1 L124.7,200.9 L121.9,202.4 L118.9,203.5 L115.7,204.2 L112.4,204.3 L109.6,205.9 L106.5,206.9 L103.3,207.5 L100.0,207.7 L96.7,207.5 L93.5,206.9 L90.4,205.9 L87.6,204.3 L84.3,204.2 L81.1,203.5 L78.1,202.4 L75.3,200.9 L72.8,199.1 L70.6,197.0 L68.8,194.6 L67.6,192.0 L65.0,190.2 L63.0,188.0 L61.3,185.6 L60.1,183.0 L59.3,180.3 L58.9,177.5 L59.1,174.7 L60.0,172.0 L59.1,169.3 L58.9,166.5 L59.3,163.7 L60.1,161.0 L61.3,158.4 L63.0,156.0 L65.0,153.8 L67.6,152.0 L68.8,149.4 L70.6,147.0 L72.8,144.9 L75.3,143.1 L78.1,141.6 L81.1,140.5 L84.3,139.8 L87.6,139.7 L90.4,138.1 L93.5,137.1 L96.7,136.5 L100.0,136.3 L103.3,136.5 L106.5,137.1 L109.6,138.1 L112.4,139.7 L115.7,139.8 L118.9,140.5 L121.9,141.6 L124.7,143.1 L127.2,144.9 L129.4,147.0 L131.2,149.4 L132.4,152.0 L135.0,153.8 L137.0,156.0 L138.7,158.4 L139.9,161.0 L140.7,163.7 L141.1,166.5 L140.9,169.3 L140.0,172.0Z" fill="#B8743D"/>
+<ellipse cx="100" cy="178" rx="25" ry="22" fill="#FBEBD3"/>
+<ellipse cx="80" cy="203" rx="13" ry="8" fill="#9A5A2B"/><ellipse cx="120" cy="203" rx="13" ry="8" fill="#9A5A2B"/>
+<ellipse cx="80" cy="205" rx="6" ry="3.5" fill="#F2A3A6"/><ellipse cx="120" cy="205" rx="6" ry="3.5" fill="#F2A3A6"/>
+<ellipse cx="60" cy="168" rx="10" ry="15" transform="rotate(25 60 168)" fill="#9A5A2B"/><ellipse cx="64" cy="180" rx="5" ry="4" fill="#F2A3A6"/>
+
+</g>
+<g class="tete">
+<circle cx="40" cy="66" r="12" fill="#9A5A2B"/><circle cx="160" cy="66" r="12" fill="#9A5A2B"/>
+<circle cx="41" cy="67" r="6" fill="#F2A3A6"/><circle cx="159" cy="67" r="6" fill="#F2A3A6"/>
+<path d="M172.0,94.0 L173.7,96.9 L174.5,99.9 L174.6,102.9 L174.1,105.9 L173.1,108.8 L171.6,111.5 L169.5,114.0 L166.5,116.2 L166.7,119.4 L166.0,122.4 L164.7,125.2 L162.9,127.8 L160.6,130.2 L157.8,132.2 L154.7,133.9 L150.9,135.0 L149.6,138.1 L147.5,140.6 L144.9,142.8 L142.0,144.6 L138.8,146.1 L135.3,147.2 L131.6,147.8 L127.6,147.6 L124.9,150.0 L121.7,151.7 L118.3,152.9 L114.7,153.7 L111.1,154.1 L107.3,154.0 L103.6,153.4 L100.0,152.0 L96.4,153.4 L92.7,154.0 L88.9,154.1 L85.3,153.7 L81.7,152.9 L78.3,151.7 L75.1,150.0 L72.4,147.6 L68.4,147.8 L64.7,147.2 L61.2,146.1 L58.0,144.6 L55.1,142.8 L52.5,140.6 L50.4,138.1 L49.1,135.0 L45.3,133.9 L42.2,132.2 L39.4,130.2 L37.1,127.8 L35.3,125.2 L34.0,122.4 L33.3,119.4 L33.5,116.2 L30.5,114.0 L28.4,111.5 L26.9,108.8 L25.9,105.9 L25.4,102.9 L25.5,99.9 L26.3,96.9 L28.0,94.0 L26.3,91.1 L25.5,88.1 L25.4,85.1 L25.9,82.1 L26.9,79.2 L28.4,76.5 L30.5,74.0 L33.5,71.8 L33.3,68.6 L34.0,65.6 L35.3,62.8 L37.1,60.2 L39.4,57.8 L42.2,55.8 L45.3,54.1 L49.1,53.0 L50.4,49.9 L52.5,47.4 L55.1,45.2 L58.0,43.4 L61.2,41.9 L64.7,40.8 L68.4,40.2 L72.4,40.4 L75.1,38.0 L78.3,36.3 L81.7,35.1 L85.3,34.3 L88.9,33.9 L92.7,34.0 L96.4,34.6 L100.0,36.0 L103.6,34.6 L107.3,34.0 L111.1,33.9 L114.7,34.3 L118.3,35.1 L121.7,36.3 L124.9,38.0 L127.6,40.4 L131.6,40.2 L135.3,40.8 L138.8,41.9 L142.0,43.4 L144.9,45.2 L147.5,47.4 L149.6,49.9 L150.9,53.0 L154.7,54.1 L157.8,55.8 L160.6,57.8 L162.9,60.2 L164.7,62.8 L166.0,65.6 L166.7,68.6 L166.5,71.8 L169.5,74.0 L171.6,76.5 L173.1,79.2 L174.1,82.1 L174.6,85.1 L174.5,88.1 L173.7,91.1 L172.0,94.0Z" fill="#B8743D"/>
+<path d="M88 38 C86 22 96 18 100 30 C104 16 116 22 110 38 C104 32 96 32 88 38Z" fill="#B8743D"/>
+<path d="M78 40 Q84 34 90 40" stroke="#9A5A2B" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M110 40 Q116 34 122 40" stroke="#9A5A2B" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M100 70 C88 62 70 62 56 68 C40 76 34 96 40 114 C48 134 76 142 100 142 C124 142 152 134 160 114 C166 96 160 76 144 68 C130 62 112 62 100 70Z" fill="#FBEBD3"/>
+<ellipse cx="54" cy="114" rx="12" ry="7.5" fill="#F2A3A6" opacity=".85"/><ellipse cx="146" cy="114" rx="12" ry="7.5" fill="#F2A3A6" opacity=".85"/>
+<g class="yeux"><g class="oeil" style="transform-origin:70px 90px"><circle cx="70" cy="90" r="20" fill="#2B1A12"/>
+<circle cx="70" cy="95" r="14" fill="#7A4523"/><circle cx="70" cy="93" r="9" fill="#2B1A12"/>
+<circle cx="63" cy="82" r="6.5" fill="#fff"/><circle cx="78" cy="98" r="3.2" fill="#fff"/><circle cx="73" cy="79" r="2" fill="#fff"/></g><g class="oeil" style="transform-origin:130px 90px"><circle cx="130" cy="90" r="20" fill="#2B1A12"/>
+<circle cx="130" cy="95" r="14" fill="#7A4523"/><circle cx="130" cy="93" r="9" fill="#2B1A12"/>
+<circle cx="123" cy="82" r="6.5" fill="#fff"/><circle cx="138" cy="98" r="3.2" fill="#fff"/><circle cx="133" cy="79" r="2" fill="#fff"/></g></g>
+<path d="M91 105 Q100 100 109 105 Q109 113 100 116 Q91 113 91 105Z" fill="#2B1A12"/>
+<ellipse cx="96" cy="106" rx="3" ry="1.6" fill="#fff" opacity=".7"/>
+<path d="M89 118 Q100 134 111 118 Z" fill="#8E3B3B"/><path d="M93 124 Q100 131 107 124 Z" fill="#F2A3A6"/>
+<g class="bras-coucou" style="transform-origin:136px 164px"><path d="M136 164 Q152 154 158 136" stroke="#9A5A2B" stroke-width="26" stroke-linecap="round" fill="none"/><path d="M136 164 Q152 154 158 136" stroke="#B8743D" stroke-width="22" stroke-linecap="round" fill="none"/><ellipse cx="159" cy="132" rx="6.5" ry="5.5" fill="#F2A3A6"/></g>
+<g fill="#9A5A2B"><circle cx="78" cy="116" r="1.8"/><circle cx="72" cy="121" r="1.8"/><circle cx="122" cy="116" r="1.8"/><circle cx="128" cy="121" r="1.8"/></g>
+</g>
+</svg></div></div>
+    <svg class="eau-devant" viewBox="0 0 520 70" aria-hidden="true" focusable="false"><path d="M0 70 C70 66 120 34 180 28 C230 24 236 16 260 16 C284 16 290 24 340 28 C400 34 450 66 520 70Z" fill="var(--eau)"/><path d="M196 30 C230 24 290 24 324 30" stroke="var(--eau-2)" stroke-width="5" fill="none" stroke-linecap="round"/></svg>
+    <svg class="galet-berge" viewBox="0 0 60 40" aria-hidden="true" focusable="false"><ellipse cx="30" cy="22" rx="28" ry="17" fill="var(--soleil)"/><ellipse cx="22" cy="15" rx="9" ry="4" fill="#fff" opacity=".55"/></svg>
+  </div>
+</header>
+
+<main id="contenu">
+  <section class="pre" aria-labelledby="titre-journee">
+    <div class="conteneur">
+      <div class="panneau">
+        <h2 id="titre-journee">Une journée avec ta loutre</h2>
+        <p class="chapo">Ottle ne te juge jamais et ne te punit jamais. Même les jours où tu ne coches rien.</p>
+        <ol class="etapes">
+          <li class="etape matin">
+            <div class="medaillon" aria-hidden="true"><svg class="" viewBox="0 0 200 215" aria-hidden="true" focusable="false">
+<g class="corps">
+<path d="M128 196 C170 210 182 176 176 160 C172 182 152 190 128 184Z" fill="#9A5A2B"/>
+<path d="M140.0,172.0 L140.9,174.7 L141.1,177.5 L140.7,180.3 L139.9,183.0 L138.7,185.6 L137.0,188.0 L135.0,190.2 L132.4,192.0 L131.2,194.6 L129.4,197.0 L127.2,199.1 L124.7,200.9 L121.9,202.4 L118.9,203.5 L115.7,204.2 L112.4,204.3 L109.6,205.9 L106.5,206.9 L103.3,207.5 L100.0,207.7 L96.7,207.5 L93.5,206.9 L90.4,205.9 L87.6,204.3 L84.3,204.2 L81.1,203.5 L78.1,202.4 L75.3,200.9 L72.8,199.1 L70.6,197.0 L68.8,194.6 L67.6,192.0 L65.0,190.2 L63.0,188.0 L61.3,185.6 L60.1,183.0 L59.3,180.3 L58.9,177.5 L59.1,174.7 L60.0,172.0 L59.1,169.3 L58.9,166.5 L59.3,163.7 L60.1,161.0 L61.3,158.4 L63.0,156.0 L65.0,153.8 L67.6,152.0 L68.8,149.4 L70.6,147.0 L72.8,144.9 L75.3,143.1 L78.1,141.6 L81.1,140.5 L84.3,139.8 L87.6,139.7 L90.4,138.1 L93.5,137.1 L96.7,136.5 L100.0,136.3 L103.3,136.5 L106.5,137.1 L109.6,138.1 L112.4,139.7 L115.7,139.8 L118.9,140.5 L121.9,141.6 L124.7,143.1 L127.2,144.9 L129.4,147.0 L131.2,149.4 L132.4,152.0 L135.0,153.8 L137.0,156.0 L138.7,158.4 L139.9,161.0 L140.7,163.7 L141.1,166.5 L140.9,169.3 L140.0,172.0Z" fill="#B8743D"/>
+<ellipse cx="100" cy="178" rx="25" ry="22" fill="#FBEBD3"/>
+<ellipse cx="80" cy="203" rx="13" ry="8" fill="#9A5A2B"/><ellipse cx="120" cy="203" rx="13" ry="8" fill="#9A5A2B"/>
+<ellipse cx="80" cy="205" rx="6" ry="3.5" fill="#F2A3A6"/><ellipse cx="120" cy="205" rx="6" ry="3.5" fill="#F2A3A6"/>
+<ellipse cx="60" cy="168" rx="10" ry="15" transform="rotate(25 60 168)" fill="#9A5A2B"/><ellipse cx="64" cy="180" rx="5" ry="4" fill="#F2A3A6"/>
+<ellipse cx="140" cy="168" rx="10" ry="15" transform="rotate(-25 140 168)" fill="#9A5A2B"/><ellipse cx="136" cy="180" rx="5" ry="4" fill="#F2A3A6"/>
+</g>
+<g class="tete">
+<circle cx="40" cy="66" r="12" fill="#9A5A2B"/><circle cx="160" cy="66" r="12" fill="#9A5A2B"/>
+<circle cx="41" cy="67" r="6" fill="#F2A3A6"/><circle cx="159" cy="67" r="6" fill="#F2A3A6"/>
+<path d="M172.0,94.0 L173.7,96.9 L174.5,99.9 L174.6,102.9 L174.1,105.9 L173.1,108.8 L171.6,111.5 L169.5,114.0 L166.5,116.2 L166.7,119.4 L166.0,122.4 L164.7,125.2 L162.9,127.8 L160.6,130.2 L157.8,132.2 L154.7,133.9 L150.9,135.0 L149.6,138.1 L147.5,140.6 L144.9,142.8 L142.0,144.6 L138.8,146.1 L135.3,147.2 L131.6,147.8 L127.6,147.6 L124.9,150.0 L121.7,151.7 L118.3,152.9 L114.7,153.7 L111.1,154.1 L107.3,154.0 L103.6,153.4 L100.0,152.0 L96.4,153.4 L92.7,154.0 L88.9,154.1 L85.3,153.7 L81.7,152.9 L78.3,151.7 L75.1,150.0 L72.4,147.6 L68.4,147.8 L64.7,147.2 L61.2,146.1 L58.0,144.6 L55.1,142.8 L52.5,140.6 L50.4,138.1 L49.1,135.0 L45.3,133.9 L42.2,132.2 L39.4,130.2 L37.1,127.8 L35.3,125.2 L34.0,122.4 L33.3,119.4 L33.5,116.2 L30.5,114.0 L28.4,111.5 L26.9,108.8 L25.9,105.9 L25.4,102.9 L25.5,99.9 L26.3,96.9 L28.0,94.0 L26.3,91.1 L25.5,88.1 L25.4,85.1 L25.9,82.1 L26.9,79.2 L28.4,76.5 L30.5,74.0 L33.5,71.8 L33.3,68.6 L34.0,65.6 L35.3,62.8 L37.1,60.2 L39.4,57.8 L42.2,55.8 L45.3,54.1 L49.1,53.0 L50.4,49.9 L52.5,47.4 L55.1,45.2 L58.0,43.4 L61.2,41.9 L64.7,40.8 L68.4,40.2 L72.4,40.4 L75.1,38.0 L78.3,36.3 L81.7,35.1 L85.3,34.3 L88.9,33.9 L92.7,34.0 L96.4,34.6 L100.0,36.0 L103.6,34.6 L107.3,34.0 L111.1,33.9 L114.7,34.3 L118.3,35.1 L121.7,36.3 L124.9,38.0 L127.6,40.4 L131.6,40.2 L135.3,40.8 L138.8,41.9 L142.0,43.4 L144.9,45.2 L147.5,47.4 L149.6,49.9 L150.9,53.0 L154.7,54.1 L157.8,55.8 L160.6,57.8 L162.9,60.2 L164.7,62.8 L166.0,65.6 L166.7,68.6 L166.5,71.8 L169.5,74.0 L171.6,76.5 L173.1,79.2 L174.1,82.1 L174.6,85.1 L174.5,88.1 L173.7,91.1 L172.0,94.0Z" fill="#B8743D"/>
+<path d="M88 38 C86 22 96 18 100 30 C104 16 116 22 110 38 C104 32 96 32 88 38Z" fill="#B8743D"/>
+<path d="M78 40 Q84 34 90 40" stroke="#9A5A2B" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M110 40 Q116 34 122 40" stroke="#9A5A2B" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M100 70 C88 62 70 62 56 68 C40 76 34 96 40 114 C48 134 76 142 100 142 C124 142 152 134 160 114 C166 96 160 76 144 68 C130 62 112 62 100 70Z" fill="#FBEBD3"/>
+<ellipse cx="54" cy="114" rx="12" ry="7.5" fill="#F2A3A6" opacity=".85"/><ellipse cx="146" cy="114" rx="12" ry="7.5" fill="#F2A3A6" opacity=".85"/>
+<g class="yeux"><g class="oeil" style="transform-origin:70px 90px"><circle cx="70" cy="90" r="20" fill="#2B1A12"/>
+<circle cx="70" cy="95" r="14" fill="#7A4523"/><circle cx="70" cy="93" r="9" fill="#2B1A12"/>
+<circle cx="63" cy="82" r="6.5" fill="#fff"/><circle cx="78" cy="98" r="3.2" fill="#fff"/><circle cx="73" cy="79" r="2" fill="#fff"/></g><g class="oeil" style="transform-origin:130px 90px"><circle cx="130" cy="90" r="20" fill="#2B1A12"/>
+<circle cx="130" cy="95" r="14" fill="#7A4523"/><circle cx="130" cy="93" r="9" fill="#2B1A12"/>
+<circle cx="123" cy="82" r="6.5" fill="#fff"/><circle cx="138" cy="98" r="3.2" fill="#fff"/><circle cx="133" cy="79" r="2" fill="#fff"/></g><path d="M49.5 88 A20.5 20.5 0 0 1 90.5 88 Q70 92 49.5 88Z" fill="#B8743D"/><path d="M50 88 Q70 92 90 88" stroke="#2B1A12" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M109.5 88 A20.5 20.5 0 0 1 150.5 88 Q130 92 109.5 88Z" fill="#B8743D"/><path d="M110 88 Q130 92 150 88" stroke="#2B1A12" stroke-width="3" fill="none" stroke-linecap="round"/></g>
+<path d="M91 105 Q100 100 109 105 Q109 113 100 116 Q91 113 91 105Z" fill="#2B1A12"/>
+<ellipse cx="96" cy="106" rx="3" ry="1.6" fill="#fff" opacity=".7"/>
+<path d="M92 123 L108 123" stroke="#2B1A12" stroke-width="3.5" stroke-linecap="round"/>
+
+<g fill="#9A5A2B"><circle cx="78" cy="116" r="1.8"/><circle cx="72" cy="121" r="1.8"/><circle cx="122" cy="116" r="1.8"/><circle cx="128" cy="121" r="1.8"/></g>
+</g>
+</svg></div>
+            <div><span class="moment">Le matin</span><h3>Dis-lui comment tu te sens</h3><p>Bien, bof, fatigue ou stress : quelques secondes, et ta loutre part à l'aventure.</p></div>
+          </li>
+          <li class="etape journee">
+            <div class="medaillon" aria-hidden="true"><svg class="" viewBox="0 0 200 215" aria-hidden="true" focusable="false">
+<g class="corps">
+<path d="M128 196 C170 210 182 176 176 160 C172 182 152 190 128 184Z" fill="#9A5A2B"/>
+<path d="M140.0,172.0 L140.9,174.7 L141.1,177.5 L140.7,180.3 L139.9,183.0 L138.7,185.6 L137.0,188.0 L135.0,190.2 L132.4,192.0 L131.2,194.6 L129.4,197.0 L127.2,199.1 L124.7,200.9 L121.9,202.4 L118.9,203.5 L115.7,204.2 L112.4,204.3 L109.6,205.9 L106.5,206.9 L103.3,207.5 L100.0,207.7 L96.7,207.5 L93.5,206.9 L90.4,205.9 L87.6,204.3 L84.3,204.2 L81.1,203.5 L78.1,202.4 L75.3,200.9 L72.8,199.1 L70.6,197.0 L68.8,194.6 L67.6,192.0 L65.0,190.2 L63.0,188.0 L61.3,185.6 L60.1,183.0 L59.3,180.3 L58.9,177.5 L59.1,174.7 L60.0,172.0 L59.1,169.3 L58.9,166.5 L59.3,163.7 L60.1,161.0 L61.3,158.4 L63.0,156.0 L65.0,153.8 L67.6,152.0 L68.8,149.4 L70.6,147.0 L72.8,144.9 L75.3,143.1 L78.1,141.6 L81.1,140.5 L84.3,139.8 L87.6,139.7 L90.4,138.1 L93.5,137.1 L96.7,136.5 L100.0,136.3 L103.3,136.5 L106.5,137.1 L109.6,138.1 L112.4,139.7 L115.7,139.8 L118.9,140.5 L121.9,141.6 L124.7,143.1 L127.2,144.9 L129.4,147.0 L131.2,149.4 L132.4,152.0 L135.0,153.8 L137.0,156.0 L138.7,158.4 L139.9,161.0 L140.7,163.7 L141.1,166.5 L140.9,169.3 L140.0,172.0Z" fill="#B8743D"/>
+<ellipse cx="100" cy="178" rx="25" ry="22" fill="#FBEBD3"/>
+<ellipse cx="80" cy="203" rx="13" ry="8" fill="#9A5A2B"/><ellipse cx="120" cy="203" rx="13" ry="8" fill="#9A5A2B"/>
+<ellipse cx="80" cy="205" rx="6" ry="3.5" fill="#F2A3A6"/><ellipse cx="120" cy="205" rx="6" ry="3.5" fill="#F2A3A6"/>
+<ellipse cx="60" cy="168" rx="10" ry="15" transform="rotate(25 60 168)" fill="#9A5A2B"/><ellipse cx="64" cy="180" rx="5" ry="4" fill="#F2A3A6"/>
+<ellipse cx="140" cy="168" rx="10" ry="15" transform="rotate(-25 140 168)" fill="#9A5A2B"/><ellipse cx="136" cy="180" rx="5" ry="4" fill="#F2A3A6"/>
+</g>
+<g class="tete">
+<circle cx="40" cy="66" r="12" fill="#9A5A2B"/><circle cx="160" cy="66" r="12" fill="#9A5A2B"/>
+<circle cx="41" cy="67" r="6" fill="#F2A3A6"/><circle cx="159" cy="67" r="6" fill="#F2A3A6"/>
+<path d="M172.0,94.0 L173.7,96.9 L174.5,99.9 L174.6,102.9 L174.1,105.9 L173.1,108.8 L171.6,111.5 L169.5,114.0 L166.5,116.2 L166.7,119.4 L166.0,122.4 L164.7,125.2 L162.9,127.8 L160.6,130.2 L157.8,132.2 L154.7,133.9 L150.9,135.0 L149.6,138.1 L147.5,140.6 L144.9,142.8 L142.0,144.6 L138.8,146.1 L135.3,147.2 L131.6,147.8 L127.6,147.6 L124.9,150.0 L121.7,151.7 L118.3,152.9 L114.7,153.7 L111.1,154.1 L107.3,154.0 L103.6,153.4 L100.0,152.0 L96.4,153.4 L92.7,154.0 L88.9,154.1 L85.3,153.7 L81.7,152.9 L78.3,151.7 L75.1,150.0 L72.4,147.6 L68.4,147.8 L64.7,147.2 L61.2,146.1 L58.0,144.6 L55.1,142.8 L52.5,140.6 L50.4,138.1 L49.1,135.0 L45.3,133.9 L42.2,132.2 L39.4,130.2 L37.1,127.8 L35.3,125.2 L34.0,122.4 L33.3,119.4 L33.5,116.2 L30.5,114.0 L28.4,111.5 L26.9,108.8 L25.9,105.9 L25.4,102.9 L25.5,99.9 L26.3,96.9 L28.0,94.0 L26.3,91.1 L25.5,88.1 L25.4,85.1 L25.9,82.1 L26.9,79.2 L28.4,76.5 L30.5,74.0 L33.5,71.8 L33.3,68.6 L34.0,65.6 L35.3,62.8 L37.1,60.2 L39.4,57.8 L42.2,55.8 L45.3,54.1 L49.1,53.0 L50.4,49.9 L52.5,47.4 L55.1,45.2 L58.0,43.4 L61.2,41.9 L64.7,40.8 L68.4,40.2 L72.4,40.4 L75.1,38.0 L78.3,36.3 L81.7,35.1 L85.3,34.3 L88.9,33.9 L92.7,34.0 L96.4,34.6 L100.0,36.0 L103.6,34.6 L107.3,34.0 L111.1,33.9 L114.7,34.3 L118.3,35.1 L121.7,36.3 L124.9,38.0 L127.6,40.4 L131.6,40.2 L135.3,40.8 L138.8,41.9 L142.0,43.4 L144.9,45.2 L147.5,47.4 L149.6,49.9 L150.9,53.0 L154.7,54.1 L157.8,55.8 L160.6,57.8 L162.9,60.2 L164.7,62.8 L166.0,65.6 L166.7,68.6 L166.5,71.8 L169.5,74.0 L171.6,76.5 L173.1,79.2 L174.1,82.1 L174.6,85.1 L174.5,88.1 L173.7,91.1 L172.0,94.0Z" fill="#B8743D"/>
+<path d="M88 38 C86 22 96 18 100 30 C104 16 116 22 110 38 C104 32 96 32 88 38Z" fill="#B8743D"/>
+<path d="M78 40 Q84 34 90 40" stroke="#9A5A2B" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M110 40 Q116 34 122 40" stroke="#9A5A2B" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M100 70 C88 62 70 62 56 68 C40 76 34 96 40 114 C48 134 76 142 100 142 C124 142 152 134 160 114 C166 96 160 76 144 68 C130 62 112 62 100 70Z" fill="#FBEBD3"/>
+<ellipse cx="54" cy="114" rx="12" ry="7.5" fill="#F2A3A6" opacity=".85"/><ellipse cx="146" cy="114" rx="12" ry="7.5" fill="#F2A3A6" opacity=".85"/>
+<g class="yeux"><path d="M52 96 Q70 76 88 96" stroke="#2B1A12" stroke-width="6" fill="none" stroke-linecap="round"/>
+<path d="M112 96 Q130 76 148 96" stroke="#2B1A12" stroke-width="6" fill="none" stroke-linecap="round"/></g>
+<path d="M91 105 Q100 100 109 105 Q109 113 100 116 Q91 113 91 105Z" fill="#2B1A12"/>
+<ellipse cx="96" cy="106" rx="3" ry="1.6" fill="#fff" opacity=".7"/>
+<path d="M89 118 Q100 134 111 118 Z" fill="#8E3B3B"/><path d="M93 124 Q100 131 107 124 Z" fill="#F2A3A6"/>
+
+<g fill="#9A5A2B"><circle cx="78" cy="116" r="1.8"/><circle cx="72" cy="121" r="1.8"/><circle cx="122" cy="116" r="1.8"/><circle cx="128" cy="121" r="1.8"/></g>
+</g>
+</svg></div>
+            <div><span class="moment">Dans la journée</span><h3>Coche tes petits objectifs</h3><p>Boire un verre d'eau, sortir 5 minutes, appeler un proche. Chaque petite chose lui donne de l'énergie.</p></div>
+          </li>
+          <li class="etape soir">
+            <div class="medaillon" aria-hidden="true"><svg class="" viewBox="0 0 200 215" aria-hidden="true" focusable="false">
+<g class="corps">
+<path d="M128 196 C170 210 182 176 176 160 C172 182 152 190 128 184Z" fill="#9A5A2B"/>
+<path d="M140.0,172.0 L140.9,174.7 L141.1,177.5 L140.7,180.3 L139.9,183.0 L138.7,185.6 L137.0,188.0 L135.0,190.2 L132.4,192.0 L131.2,194.6 L129.4,197.0 L127.2,199.1 L124.7,200.9 L121.9,202.4 L118.9,203.5 L115.7,204.2 L112.4,204.3 L109.6,205.9 L106.5,206.9 L103.3,207.5 L100.0,207.7 L96.7,207.5 L93.5,206.9 L90.4,205.9 L87.6,204.3 L84.3,204.2 L81.1,203.5 L78.1,202.4 L75.3,200.9 L72.8,199.1 L70.6,197.0 L68.8,194.6 L67.6,192.0 L65.0,190.2 L63.0,188.0 L61.3,185.6 L60.1,183.0 L59.3,180.3 L58.9,177.5 L59.1,174.7 L60.0,172.0 L59.1,169.3 L58.9,166.5 L59.3,163.7 L60.1,161.0 L61.3,158.4 L63.0,156.0 L65.0,153.8 L67.6,152.0 L68.8,149.4 L70.6,147.0 L72.8,144.9 L75.3,143.1 L78.1,141.6 L81.1,140.5 L84.3,139.8 L87.6,139.7 L90.4,138.1 L93.5,137.1 L96.7,136.5 L100.0,136.3 L103.3,136.5 L106.5,137.1 L109.6,138.1 L112.4,139.7 L115.7,139.8 L118.9,140.5 L121.9,141.6 L124.7,143.1 L127.2,144.9 L129.4,147.0 L131.2,149.4 L132.4,152.0 L135.0,153.8 L137.0,156.0 L138.7,158.4 L139.9,161.0 L140.7,163.7 L141.1,166.5 L140.9,169.3 L140.0,172.0Z" fill="#B8743D"/>
+<ellipse cx="100" cy="178" rx="25" ry="22" fill="#FBEBD3"/>
+<ellipse cx="80" cy="203" rx="13" ry="8" fill="#9A5A2B"/><ellipse cx="120" cy="203" rx="13" ry="8" fill="#9A5A2B"/>
+<ellipse cx="80" cy="205" rx="6" ry="3.5" fill="#F2A3A6"/><ellipse cx="120" cy="205" rx="6" ry="3.5" fill="#F2A3A6"/>
+<ellipse cx="60" cy="168" rx="10" ry="15" transform="rotate(25 60 168)" fill="#9A5A2B"/><ellipse cx="64" cy="180" rx="5" ry="4" fill="#F2A3A6"/>
+<ellipse cx="140" cy="168" rx="10" ry="15" transform="rotate(-25 140 168)" fill="#9A5A2B"/><ellipse cx="136" cy="180" rx="5" ry="4" fill="#F2A3A6"/>
+</g>
+<g class="tete">
+<circle cx="40" cy="66" r="12" fill="#9A5A2B"/><circle cx="160" cy="66" r="12" fill="#9A5A2B"/>
+<circle cx="41" cy="67" r="6" fill="#F2A3A6"/><circle cx="159" cy="67" r="6" fill="#F2A3A6"/>
+<path d="M172.0,94.0 L173.7,96.9 L174.5,99.9 L174.6,102.9 L174.1,105.9 L173.1,108.8 L171.6,111.5 L169.5,114.0 L166.5,116.2 L166.7,119.4 L166.0,122.4 L164.7,125.2 L162.9,127.8 L160.6,130.2 L157.8,132.2 L154.7,133.9 L150.9,135.0 L149.6,138.1 L147.5,140.6 L144.9,142.8 L142.0,144.6 L138.8,146.1 L135.3,147.2 L131.6,147.8 L127.6,147.6 L124.9,150.0 L121.7,151.7 L118.3,152.9 L114.7,153.7 L111.1,154.1 L107.3,154.0 L103.6,153.4 L100.0,152.0 L96.4,153.4 L92.7,154.0 L88.9,154.1 L85.3,153.7 L81.7,152.9 L78.3,151.7 L75.1,150.0 L72.4,147.6 L68.4,147.8 L64.7,147.2 L61.2,146.1 L58.0,144.6 L55.1,142.8 L52.5,140.6 L50.4,138.1 L49.1,135.0 L45.3,133.9 L42.2,132.2 L39.4,130.2 L37.1,127.8 L35.3,125.2 L34.0,122.4 L33.3,119.4 L33.5,116.2 L30.5,114.0 L28.4,111.5 L26.9,108.8 L25.9,105.9 L25.4,102.9 L25.5,99.9 L26.3,96.9 L28.0,94.0 L26.3,91.1 L25.5,88.1 L25.4,85.1 L25.9,82.1 L26.9,79.2 L28.4,76.5 L30.5,74.0 L33.5,71.8 L33.3,68.6 L34.0,65.6 L35.3,62.8 L37.1,60.2 L39.4,57.8 L42.2,55.8 L45.3,54.1 L49.1,53.0 L50.4,49.9 L52.5,47.4 L55.1,45.2 L58.0,43.4 L61.2,41.9 L64.7,40.8 L68.4,40.2 L72.4,40.4 L75.1,38.0 L78.3,36.3 L81.7,35.1 L85.3,34.3 L88.9,33.9 L92.7,34.0 L96.4,34.6 L100.0,36.0 L103.6,34.6 L107.3,34.0 L111.1,33.9 L114.7,34.3 L118.3,35.1 L121.7,36.3 L124.9,38.0 L127.6,40.4 L131.6,40.2 L135.3,40.8 L138.8,41.9 L142.0,43.4 L144.9,45.2 L147.5,47.4 L149.6,49.9 L150.9,53.0 L154.7,54.1 L157.8,55.8 L160.6,57.8 L162.9,60.2 L164.7,62.8 L166.0,65.6 L166.7,68.6 L166.5,71.8 L169.5,74.0 L171.6,76.5 L173.1,79.2 L174.1,82.1 L174.6,85.1 L174.5,88.1 L173.7,91.1 L172.0,94.0Z" fill="#B8743D"/>
+<path d="M88 38 C86 22 96 18 100 30 C104 16 116 22 110 38 C104 32 96 32 88 38Z" fill="#B8743D"/>
+<path d="M78 40 Q84 34 90 40" stroke="#9A5A2B" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M110 40 Q116 34 122 40" stroke="#9A5A2B" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M100 70 C88 62 70 62 56 68 C40 76 34 96 40 114 C48 134 76 142 100 142 C124 142 152 134 160 114 C166 96 160 76 144 68 C130 62 112 62 100 70Z" fill="#FBEBD3"/>
+<ellipse cx="54" cy="114" rx="12" ry="7.5" fill="#F2A3A6" opacity=".85"/><ellipse cx="146" cy="114" rx="12" ry="7.5" fill="#F2A3A6" opacity=".85"/>
+<g class="yeux"><g class="oeil" style="transform-origin:70px 90px"><circle cx="70" cy="90" r="20" fill="#2B1A12"/>
+<circle cx="70" cy="95" r="14" fill="#7A4523"/><circle cx="70" cy="93" r="9" fill="#2B1A12"/>
+<circle cx="63" cy="82" r="6.5" fill="#fff"/><circle cx="78" cy="98" r="3.2" fill="#fff"/><circle cx="73" cy="79" r="2" fill="#fff"/></g><g class="oeil" style="transform-origin:130px 90px"><circle cx="130" cy="90" r="20" fill="#2B1A12"/>
+<circle cx="130" cy="95" r="14" fill="#7A4523"/><circle cx="130" cy="93" r="9" fill="#2B1A12"/>
+<circle cx="123" cy="82" r="6.5" fill="#fff"/><circle cx="138" cy="98" r="3.2" fill="#fff"/><circle cx="133" cy="79" r="2" fill="#fff"/></g></g>
+<path d="M91 105 Q100 100 109 105 Q109 113 100 116 Q91 113 91 105Z" fill="#2B1A12"/>
+<ellipse cx="96" cy="106" rx="3" ry="1.6" fill="#fff" opacity=".7"/>
+<path d="M90 118 Q95 124 100 118 Q105 124 110 118" stroke="#2B1A12" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+<g fill="#9A5A2B"><circle cx="78" cy="116" r="1.8"/><circle cx="72" cy="121" r="1.8"/><circle cx="122" cy="116" r="1.8"/><circle cx="128" cy="121" r="1.8"/></g>
+</g>
+</svg></div>
+            <div><span class="moment">Le soir</span><h3>Elle revient te raconter</h3><p>Elle te rapporte une carte postale de son voyage, et tu notes un bon moment de ta journée.</p></div>
+          </li>
+        </ol>
+        <figure class="carte-postale">
+          <figcaption class="de">Exemple de carte postale · Jeudi soir, sur la Loire</figcaption>
+          <blockquote><p>« Aujourd'hui je suis passée sous un très vieux pont. Les pierres étaient chaudes de soleil. Et toi, tu as vu quelque chose de beau aujourd'hui ? »</p></blockquote>
+          <span class="signature">– Loulou</span>
+          <span class="galet-gagne"><i aria-hidden="true"></i>Nouveau galet : galet de Loire</span>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="berge" aria-labelledby="titre-unique">
+    <svg class="bord-haut" viewBox="0 0 1440 34" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M0 0H1440V10C1200 34 960 4 720 18 C480 32 240 4 0 22Z" fill="var(--pre)"/></svg>
+    <div class="conteneur">
+      <h2 id="titre-unique">Ce qui rend Ottle unique</h2>
+      <ul class="atouts">
+        <li class="atout"><span class="galet" style="background:#FFD0C7" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="#5B3119" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="20" r="7"/><circle cx="27" cy="20" r="7"/><path d="M6 32c4-3 24-3 28 0"/></svg></span><div><h3>Se tenir la main</h3><p>Dans la nature, les loutres se tiennent la main pour ne pas dériver. Relie ta loutre à celle d'une personne proche : un jour difficile, elle peut te tenir la main d'un simple geste.</p></div></li>
+        <li class="atout"><span class="galet" style="background:#D9C8F0" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="#5B3119" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M8 20c4-6 20-6 24 0"/><circle cx="12" cy="16" r="1" fill="#5B3119"/><path d="M4 28q4-3 8 0t8 0 8 0 8 0"/></svg></span><div><h3>Faire la planche</h3><p>Les jours sans énergie, active le mode repos. Ta loutre flotte avec toi et ne te demande rien.</p></div></li>
+        <li class="atout"><span class="galet" style="background:#B4E6DD" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="#5B3119" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10q7 5 14 0t14 0"/><path d="M6 20q7 5 14 0t14 0"/><path d="M6 30q7 5 14 0t14 0"/></svg></span><div><h3>Les rivières de France</h3><p>Ta loutre descend la Loire, la Seine, la Dordogne… et te rapporte un galet de chaque étape, comme un petit album.</p></div></li>
+        <li class="atout"><span class="galet" style="background:#FFE08A" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="#5B3119" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 32V22a14 14 0 0 1 28 0v10z"/><path d="M15 32v-7a5 5 0 0 1 10 0v7"/></svg></span><div><h3>Sa catiche</h3><p>La catiche, c'est le vrai nom de la maison de la loutre. Décore-la à ton goût, au fil des récompenses.</p></div></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="riviere" aria-labelledby="titre-inscription">
+    <svg class="remous" style="top:-1px" viewBox="0 0 1440 26" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M0 0H1440V8C1320 26 1200 26 1080 8 C960 -6 840 26 720 14 C600 2 480 26 360 12 C240 -2 120 24 0 10Z" fill="var(--creme)"/></svg>
+    <div class="conteneur">
+      <div class="inscription" id="inscription">
+        <div class="loutre-form"><svg class="" viewBox="0 0 200 215" aria-hidden="true" focusable="false">
+<g class="corps">
+<path d="M128 196 C170 210 182 176 176 160 C172 182 152 190 128 184Z" fill="#9A5A2B"/>
+<path d="M140.0,172.0 L140.9,174.7 L141.1,177.5 L140.7,180.3 L139.9,183.0 L138.7,185.6 L137.0,188.0 L135.0,190.2 L132.4,192.0 L131.2,194.6 L129.4,197.0 L127.2,199.1 L124.7,200.9 L121.9,202.4 L118.9,203.5 L115.7,204.2 L112.4,204.3 L109.6,205.9 L106.5,206.9 L103.3,207.5 L100.0,207.7 L96.7,207.5 L93.5,206.9 L90.4,205.9 L87.6,204.3 L84.3,204.2 L81.1,203.5 L78.1,202.4 L75.3,200.9 L72.8,199.1 L70.6,197.0 L68.8,194.6 L67.6,192.0 L65.0,190.2 L63.0,188.0 L61.3,185.6 L60.1,183.0 L59.3,180.3 L58.9,177.5 L59.1,174.7 L60.0,172.0 L59.1,169.3 L58.9,166.5 L59.3,163.7 L60.1,161.0 L61.3,158.4 L63.0,156.0 L65.0,153.8 L67.6,152.0 L68.8,149.4 L70.6,147.0 L72.8,144.9 L75.3,143.1 L78.1,141.6 L81.1,140.5 L84.3,139.8 L87.6,139.7 L90.4,138.1 L93.5,137.1 L96.7,136.5 L100.0,136.3 L103.3,136.5 L106.5,137.1 L109.6,138.1 L112.4,139.7 L115.7,139.8 L118.9,140.5 L121.9,141.6 L124.7,143.1 L127.2,144.9 L129.4,147.0 L131.2,149.4 L132.4,152.0 L135.0,153.8 L137.0,156.0 L138.7,158.4 L139.9,161.0 L140.7,163.7 L141.1,166.5 L140.9,169.3 L140.0,172.0Z" fill="#B8743D"/>
+<ellipse cx="100" cy="178" rx="25" ry="22" fill="#FBEBD3"/>
+<ellipse cx="80" cy="203" rx="13" ry="8" fill="#9A5A2B"/><ellipse cx="120" cy="203" rx="13" ry="8" fill="#9A5A2B"/>
+<ellipse cx="80" cy="205" rx="6" ry="3.5" fill="#F2A3A6"/><ellipse cx="120" cy="205" rx="6" ry="3.5" fill="#F2A3A6"/>
+<ellipse cx="60" cy="168" rx="10" ry="15" transform="rotate(25 60 168)" fill="#9A5A2B"/><ellipse cx="64" cy="180" rx="5" ry="4" fill="#F2A3A6"/>
+
+</g>
+<g class="tete">
+<circle cx="40" cy="66" r="12" fill="#9A5A2B"/><circle cx="160" cy="66" r="12" fill="#9A5A2B"/>
+<circle cx="41" cy="67" r="6" fill="#F2A3A6"/><circle cx="159" cy="67" r="6" fill="#F2A3A6"/>
+<path d="M172.0,94.0 L173.7,96.9 L174.5,99.9 L174.6,102.9 L174.1,105.9 L173.1,108.8 L171.6,111.5 L169.5,114.0 L166.5,116.2 L166.7,119.4 L166.0,122.4 L164.7,125.2 L162.9,127.8 L160.6,130.2 L157.8,132.2 L154.7,133.9 L150.9,135.0 L149.6,138.1 L147.5,140.6 L144.9,142.8 L142.0,144.6 L138.8,146.1 L135.3,147.2 L131.6,147.8 L127.6,147.6 L124.9,150.0 L121.7,151.7 L118.3,152.9 L114.7,153.7 L111.1,154.1 L107.3,154.0 L103.6,153.4 L100.0,152.0 L96.4,153.4 L92.7,154.0 L88.9,154.1 L85.3,153.7 L81.7,152.9 L78.3,151.7 L75.1,150.0 L72.4,147.6 L68.4,147.8 L64.7,147.2 L61.2,146.1 L58.0,144.6 L55.1,142.8 L52.5,140.6 L50.4,138.1 L49.1,135.0 L45.3,133.9 L42.2,132.2 L39.4,130.2 L37.1,127.8 L35.3,125.2 L34.0,122.4 L33.3,119.4 L33.5,116.2 L30.5,114.0 L28.4,111.5 L26.9,108.8 L25.9,105.9 L25.4,102.9 L25.5,99.9 L26.3,96.9 L28.0,94.0 L26.3,91.1 L25.5,88.1 L25.4,85.1 L25.9,82.1 L26.9,79.2 L28.4,76.5 L30.5,74.0 L33.5,71.8 L33.3,68.6 L34.0,65.6 L35.3,62.8 L37.1,60.2 L39.4,57.8 L42.2,55.8 L45.3,54.1 L49.1,53.0 L50.4,49.9 L52.5,47.4 L55.1,45.2 L58.0,43.4 L61.2,41.9 L64.7,40.8 L68.4,40.2 L72.4,40.4 L75.1,38.0 L78.3,36.3 L81.7,35.1 L85.3,34.3 L88.9,33.9 L92.7,34.0 L96.4,34.6 L100.0,36.0 L103.6,34.6 L107.3,34.0 L111.1,33.9 L114.7,34.3 L118.3,35.1 L121.7,36.3 L124.9,38.0 L127.6,40.4 L131.6,40.2 L135.3,40.8 L138.8,41.9 L142.0,43.4 L144.9,45.2 L147.5,47.4 L149.6,49.9 L150.9,53.0 L154.7,54.1 L157.8,55.8 L160.6,57.8 L162.9,60.2 L164.7,62.8 L166.0,65.6 L166.7,68.6 L166.5,71.8 L169.5,74.0 L171.6,76.5 L173.1,79.2 L174.1,82.1 L174.6,85.1 L174.5,88.1 L173.7,91.1 L172.0,94.0Z" fill="#B8743D"/>
+<path d="M88 38 C86 22 96 18 100 30 C104 16 116 22 110 38 C104 32 96 32 88 38Z" fill="#B8743D"/>
+<path d="M78 40 Q84 34 90 40" stroke="#9A5A2B" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M110 40 Q116 34 122 40" stroke="#9A5A2B" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M100 70 C88 62 70 62 56 68 C40 76 34 96 40 114 C48 134 76 142 100 142 C124 142 152 134 160 114 C166 96 160 76 144 68 C130 62 112 62 100 70Z" fill="#FBEBD3"/>
+<ellipse cx="54" cy="114" rx="12" ry="7.5" fill="#F2A3A6" opacity=".85"/><ellipse cx="146" cy="114" rx="12" ry="7.5" fill="#F2A3A6" opacity=".85"/>
+<g class="yeux"><path d="M52 96 Q70 76 88 96" stroke="#2B1A12" stroke-width="6" fill="none" stroke-linecap="round"/>
+<path d="M112 96 Q130 76 148 96" stroke="#2B1A12" stroke-width="6" fill="none" stroke-linecap="round"/></g>
+<path d="M91 105 Q100 100 109 105 Q109 113 100 116 Q91 113 91 105Z" fill="#2B1A12"/>
+<ellipse cx="96" cy="106" rx="3" ry="1.6" fill="#fff" opacity=".7"/>
+<path d="M89 118 Q100 134 111 118 Z" fill="#8E3B3B"/><path d="M93 124 Q100 131 107 124 Z" fill="#F2A3A6"/>
+<g class="bras-coucou" style="transform-origin:136px 164px"><path d="M136 164 Q152 154 158 136" stroke="#9A5A2B" stroke-width="26" stroke-linecap="round" fill="none"/><path d="M136 164 Q152 154 158 136" stroke="#B8743D" stroke-width="22" stroke-linecap="round" fill="none"/><ellipse cx="159" cy="132" rx="6.5" ry="5.5" fill="#F2A3A6"/></g>
+<g fill="#9A5A2B"><circle cx="78" cy="116" r="1.8"/><circle cx="72" cy="121" r="1.8"/><circle cx="122" cy="116" r="1.8"/><circle cx="128" cy="121" r="1.8"/></g>
+</g>
+</svg></div>
+        <div id="bloc-form">
+          <h2 id="titre-inscription">Fais partie des premières personnes à adopter ta loutre</h2>
+          <p class="chapo">Laisse ton email : on te prévient au lancement, avec une offre membre fondateur.</p>
+          <div id="tally-zone"></div>
+          <p class="sans-tally" id="sans-tally" hidden>Le formulaire ne s'affiche pas ? <a href="https://tally.so/r/ArpoAo" target="_blank" rel="noopener">Ouvre-le dans une nouvelle page</a></p>
+          <p class="rgpd">Ton email sert uniquement à te prévenir du lancement d'Ottle. Il n'est ni vendu ni partagé. Tu peux demander sa suppression à tout moment à <a href="mailto:ottle.app@gmail.com">ottle.app@gmail.com</a>.</p>
+        </div>
+        <div id="merci">
+          <svg class="duo" viewBox="0 0 400 250" role="img" aria-label="Deux loutres qui se tiennent la main dans l'eau">
+<svg x="40" y="10" width="190" height="205" viewBox="0 0 200 215">
+<g class="corps">
+<path d="M128 196 C170 210 182 176 176 160 C172 182 152 190 128 184Z" fill="#9A5A2B"/>
+<path d="M140.0,172.0 L140.9,174.7 L141.1,177.5 L140.7,180.3 L139.9,183.0 L138.7,185.6 L137.0,188.0 L135.0,190.2 L132.4,192.0 L131.2,194.6 L129.4,197.0 L127.2,199.1 L124.7,200.9 L121.9,202.4 L118.9,203.5 L115.7,204.2 L112.4,204.3 L109.6,205.9 L106.5,206.9 L103.3,207.5 L100.0,207.7 L96.7,207.5 L93.5,206.9 L90.4,205.9 L87.6,204.3 L84.3,204.2 L81.1,203.5 L78.1,202.4 L75.3,200.9 L72.8,199.1 L70.6,197.0 L68.8,194.6 L67.6,192.0 L65.0,190.2 L63.0,188.0 L61.3,185.6 L60.1,183.0 L59.3,180.3 L58.9,177.5 L59.1,174.7 L60.0,172.0 L59.1,169.3 L58.9,166.5 L59.3,163.7 L60.1,161.0 L61.3,158.4 L63.0,156.0 L65.0,153.8 L67.6,152.0 L68.8,149.4 L70.6,147.0 L72.8,144.9 L75.3,143.1 L78.1,141.6 L81.1,140.5 L84.3,139.8 L87.6,139.7 L90.4,138.1 L93.5,137.1 L96.7,136.5 L100.0,136.3 L103.3,136.5 L106.5,137.1 L109.6,138.1 L112.4,139.7 L115.7,139.8 L118.9,140.5 L121.9,141.6 L124.7,143.1 L127.2,144.9 L129.4,147.0 L131.2,149.4 L132.4,152.0 L135.0,153.8 L137.0,156.0 L138.7,158.4 L139.9,161.0 L140.7,163.7 L141.1,166.5 L140.9,169.3 L140.0,172.0Z" fill="#B8743D"/>
+<ellipse cx="100" cy="178" rx="25" ry="22" fill="#FBEBD3"/>
+<ellipse cx="80" cy="203" rx="13" ry="8" fill="#9A5A2B"/><ellipse cx="120" cy="203" rx="13" ry="8" fill="#9A5A2B"/>
+<ellipse cx="80" cy="205" rx="6" ry="3.5" fill="#F2A3A6"/><ellipse cx="120" cy="205" rx="6" ry="3.5" fill="#F2A3A6"/>
+<ellipse cx="60" cy="168" rx="10" ry="15" transform="rotate(25 60 168)" fill="#9A5A2B"/><ellipse cx="64" cy="180" rx="5" ry="4" fill="#F2A3A6"/>
+<g><ellipse cx="160" cy="160" rx="10" ry="20" transform="rotate(-62 160 160)" fill="#B8743D"/><ellipse cx="176" cy="152" rx="6" ry="5" fill="#F2A3A6"/></g>
+</g>
+<g class="tete">
+<circle cx="40" cy="66" r="12" fill="#9A5A2B"/><circle cx="160" cy="66" r="12" fill="#9A5A2B"/>
+<circle cx="41" cy="67" r="6" fill="#F2A3A6"/><circle cx="159" cy="67" r="6" fill="#F2A3A6"/>
+<path d="M172.0,94.0 L173.7,96.9 L174.5,99.9 L174.6,102.9 L174.1,105.9 L173.1,108.8 L171.6,111.5 L169.5,114.0 L166.5,116.2 L166.7,119.4 L166.0,122.4 L164.7,125.2 L162.9,127.8 L160.6,130.2 L157.8,132.2 L154.7,133.9 L150.9,135.0 L149.6,138.1 L147.5,140.6 L144.9,142.8 L142.0,144.6 L138.8,146.1 L135.3,147.2 L131.6,147.8 L127.6,147.6 L124.9,150.0 L121.7,151.7 L118.3,152.9 L114.7,153.7 L111.1,154.1 L107.3,154.0 L103.6,153.4 L100.0,152.0 L96.4,153.4 L92.7,154.0 L88.9,154.1 L85.3,153.7 L81.7,152.9 L78.3,151.7 L75.1,150.0 L72.4,147.6 L68.4,147.8 L64.7,147.2 L61.2,146.1 L58.0,144.6 L55.1,142.8 L52.5,140.6 L50.4,138.1 L49.1,135.0 L45.3,133.9 L42.2,132.2 L39.4,130.2 L37.1,127.8 L35.3,125.2 L34.0,122.4 L33.3,119.4 L33.5,116.2 L30.5,114.0 L28.4,111.5 L26.9,108.8 L25.9,105.9 L25.4,102.9 L25.5,99.9 L26.3,96.9 L28.0,94.0 L26.3,91.1 L25.5,88.1 L25.4,85.1 L25.9,82.1 L26.9,79.2 L28.4,76.5 L30.5,74.0 L33.5,71.8 L33.3,68.6 L34.0,65.6 L35.3,62.8 L37.1,60.2 L39.4,57.8 L42.2,55.8 L45.3,54.1 L49.1,53.0 L50.4,49.9 L52.5,47.4 L55.1,45.2 L58.0,43.4 L61.2,41.9 L64.7,40.8 L68.4,40.2 L72.4,40.4 L75.1,38.0 L78.3,36.3 L81.7,35.1 L85.3,34.3 L88.9,33.9 L92.7,34.0 L96.4,34.6 L100.0,36.0 L103.6,34.6 L107.3,34.0 L111.1,33.9 L114.7,34.3 L118.3,35.1 L121.7,36.3 L124.9,38.0 L127.6,40.4 L131.6,40.2 L135.3,40.8 L138.8,41.9 L142.0,43.4 L144.9,45.2 L147.5,47.4 L149.6,49.9 L150.9,53.0 L154.7,54.1 L157.8,55.8 L160.6,57.8 L162.9,60.2 L164.7,62.8 L166.0,65.6 L166.7,68.6 L166.5,71.8 L169.5,74.0 L171.6,76.5 L173.1,79.2 L174.1,82.1 L174.6,85.1 L174.5,88.1 L173.7,91.1 L172.0,94.0Z" fill="#B8743D"/>
+<path d="M88 38 C86 22 96 18 100 30 C104 16 116 22 110 38 C104 32 96 32 88 38Z" fill="#B8743D"/>
+<path d="M78 40 Q84 34 90 40" stroke="#9A5A2B" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M110 40 Q116 34 122 40" stroke="#9A5A2B" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M100 70 C88 62 70 62 56 68 C40 76 34 96 40 114 C48 134 76 142 100 142 C124 142 152 134 160 114 C166 96 160 76 144 68 C130 62 112 62 100 70Z" fill="#FBEBD3"/>
+<ellipse cx="54" cy="114" rx="12" ry="7.5" fill="#F2A3A6" opacity=".85"/><ellipse cx="146" cy="114" rx="12" ry="7.5" fill="#F2A3A6" opacity=".85"/>
+<g class="yeux"><path d="M52 96 Q70 76 88 96" stroke="#2B1A12" stroke-width="6" fill="none" stroke-linecap="round"/>
+<path d="M112 96 Q130 76 148 96" stroke="#2B1A12" stroke-width="6" fill="none" stroke-linecap="round"/></g>
+<path d="M91 105 Q100 100 109 105 Q109 113 100 116 Q91 113 91 105Z" fill="#2B1A12"/>
+<ellipse cx="96" cy="106" rx="3" ry="1.6" fill="#fff" opacity=".7"/>
+<path d="M89 118 Q100 134 111 118 Z" fill="#8E3B3B"/><path d="M93 124 Q100 131 107 124 Z" fill="#F2A3A6"/>
+
+<g fill="#9A5A2B"><circle cx="78" cy="116" r="1.8"/><circle cx="72" cy="121" r="1.8"/><circle cx="122" cy="116" r="1.8"/><circle cx="128" cy="121" r="1.8"/></g>
+</g>
+</svg>
+<g transform="translate(400 0) scale(-1 1)"><svg x="40" y="10" width="190" height="205" viewBox="0 0 200 215">
+<g class="corps">
+<path d="M128 196 C170 210 182 176 176 160 C172 182 152 190 128 184Z" fill="#9A5A2B"/>
+<path d="M140.0,172.0 L140.9,174.7 L141.1,177.5 L140.7,180.3 L139.9,183.0 L138.7,185.6 L137.0,188.0 L135.0,190.2 L132.4,192.0 L131.2,194.6 L129.4,197.0 L127.2,199.1 L124.7,200.9 L121.9,202.4 L118.9,203.5 L115.7,204.2 L112.4,204.3 L109.6,205.9 L106.5,206.9 L103.3,207.5 L100.0,207.7 L96.7,207.5 L93.5,206.9 L90.4,205.9 L87.6,204.3 L84.3,204.2 L81.1,203.5 L78.1,202.4 L75.3,200.9 L72.8,199.1 L70.6,197.0 L68.8,194.6 L67.6,192.0 L65.0,190.2 L63.0,188.0 L61.3,185.6 L60.1,183.0 L59.3,180.3 L58.9,177.5 L59.1,174.7 L60.0,172.0 L59.1,169.3 L58.9,166.5 L59.3,163.7 L60.1,161.0 L61.3,158.4 L63.0,156.0 L65.0,153.8 L67.6,152.0 L68.8,149.4 L70.6,147.0 L72.8,144.9 L75.3,143.1 L78.1,141.6 L81.1,140.5 L84.3,139.8 L87.6,139.7 L90.4,138.1 L93.5,137.1 L96.7,136.5 L100.0,136.3 L103.3,136.5 L106.5,137.1 L109.6,138.1 L112.4,139.7 L115.7,139.8 L118.9,140.5 L121.9,141.6 L124.7,143.1 L127.2,144.9 L129.4,147.0 L131.2,149.4 L132.4,152.0 L135.0,153.8 L137.0,156.0 L138.7,158.4 L139.9,161.0 L140.7,163.7 L141.1,166.5 L140.9,169.3 L140.0,172.0Z" fill="#B8743D"/>
+<ellipse cx="100" cy="178" rx="25" ry="22" fill="#FBEBD3"/>
+<ellipse cx="80" cy="203" rx="13" ry="8" fill="#9A5A2B"/><ellipse cx="120" cy="203" rx="13" ry="8" fill="#9A5A2B"/>
+<ellipse cx="80" cy="205" rx="6" ry="3.5" fill="#F2A3A6"/><ellipse cx="120" cy="205" rx="6" ry="3.5" fill="#F2A3A6"/>
+<ellipse cx="60" cy="168" rx="10" ry="15" transform="rotate(25 60 168)" fill="#9A5A2B"/><ellipse cx="64" cy="180" rx="5" ry="4" fill="#F2A3A6"/>
+<g><ellipse cx="160" cy="160" rx="10" ry="20" transform="rotate(-62 160 160)" fill="#B8743D"/><ellipse cx="176" cy="152" rx="6" ry="5" fill="#F2A3A6"/></g>
+</g>
+<g class="tete">
+<circle cx="40" cy="66" r="12" fill="#9A5A2B"/><circle cx="160" cy="66" r="12" fill="#9A5A2B"/>
+<circle cx="41" cy="67" r="6" fill="#F2A3A6"/><circle cx="159" cy="67" r="6" fill="#F2A3A6"/>
+<path d="M172.0,94.0 L173.7,96.9 L174.5,99.9 L174.6,102.9 L174.1,105.9 L173.1,108.8 L171.6,111.5 L169.5,114.0 L166.5,116.2 L166.7,119.4 L166.0,122.4 L164.7,125.2 L162.9,127.8 L160.6,130.2 L157.8,132.2 L154.7,133.9 L150.9,135.0 L149.6,138.1 L147.5,140.6 L144.9,142.8 L142.0,144.6 L138.8,146.1 L135.3,147.2 L131.6,147.8 L127.6,147.6 L124.9,150.0 L121.7,151.7 L118.3,152.9 L114.7,153.7 L111.1,154.1 L107.3,154.0 L103.6,153.4 L100.0,152.0 L96.4,153.4 L92.7,154.0 L88.9,154.1 L85.3,153.7 L81.7,152.9 L78.3,151.7 L75.1,150.0 L72.4,147.6 L68.4,147.8 L64.7,147.2 L61.2,146.1 L58.0,144.6 L55.1,142.8 L52.5,140.6 L50.4,138.1 L49.1,135.0 L45.3,133.9 L42.2,132.2 L39.4,130.2 L37.1,127.8 L35.3,125.2 L34.0,122.4 L33.3,119.4 L33.5,116.2 L30.5,114.0 L28.4,111.5 L26.9,108.8 L25.9,105.9 L25.4,102.9 L25.5,99.9 L26.3,96.9 L28.0,94.0 L26.3,91.1 L25.5,88.1 L25.4,85.1 L25.9,82.1 L26.9,79.2 L28.4,76.5 L30.5,74.0 L33.5,71.8 L33.3,68.6 L34.0,65.6 L35.3,62.8 L37.1,60.2 L39.4,57.8 L42.2,55.8 L45.3,54.1 L49.1,53.0 L50.4,49.9 L52.5,47.4 L55.1,45.2 L58.0,43.4 L61.2,41.9 L64.7,40.8 L68.4,40.2 L72.4,40.4 L75.1,38.0 L78.3,36.3 L81.7,35.1 L85.3,34.3 L88.9,33.9 L92.7,34.0 L96.4,34.6 L100.0,36.0 L103.6,34.6 L107.3,34.0 L111.1,33.9 L114.7,34.3 L118.3,35.1 L121.7,36.3 L124.9,38.0 L127.6,40.4 L131.6,40.2 L135.3,40.8 L138.8,41.9 L142.0,43.4 L144.9,45.2 L147.5,47.4 L149.6,49.9 L150.9,53.0 L154.7,54.1 L157.8,55.8 L160.6,57.8 L162.9,60.2 L164.7,62.8 L166.0,65.6 L166.7,68.6 L166.5,71.8 L169.5,74.0 L171.6,76.5 L173.1,79.2 L174.1,82.1 L174.6,85.1 L174.5,88.1 L173.7,91.1 L172.0,94.0Z" fill="#B8743D"/>
+<path d="M88 38 C86 22 96 18 100 30 C104 16 116 22 110 38 C104 32 96 32 88 38Z" fill="#B8743D"/>
+<path d="M78 40 Q84 34 90 40" stroke="#9A5A2B" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M110 40 Q116 34 122 40" stroke="#9A5A2B" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M100 70 C88 62 70 62 56 68 C40 76 34 96 40 114 C48 134 76 142 100 142 C124 142 152 134 160 114 C166 96 160 76 144 68 C130 62 112 62 100 70Z" fill="#FBEBD3"/>
+<ellipse cx="54" cy="114" rx="12" ry="7.5" fill="#F2A3A6" opacity=".85"/><ellipse cx="146" cy="114" rx="12" ry="7.5" fill="#F2A3A6" opacity=".85"/>
+<g class="yeux"><path d="M52 96 Q70 76 88 96" stroke="#2B1A12" stroke-width="6" fill="none" stroke-linecap="round"/>
+<path d="M112 96 Q130 76 148 96" stroke="#2B1A12" stroke-width="6" fill="none" stroke-linecap="round"/></g>
+<path d="M91 105 Q100 100 109 105 Q109 113 100 116 Q91 113 91 105Z" fill="#2B1A12"/>
+<ellipse cx="96" cy="106" rx="3" ry="1.6" fill="#fff" opacity=".7"/>
+<path d="M89 118 Q100 134 111 118 Z" fill="#8E3B3B"/><path d="M93 124 Q100 131 107 124 Z" fill="#F2A3A6"/>
+
+<g fill="#9A5A2B"><circle cx="78" cy="116" r="1.8"/><circle cx="72" cy="121" r="1.8"/><circle cx="122" cy="116" r="1.8"/><circle cx="128" cy="121" r="1.8"/></g>
+</g>
+</svg></g>
+<path d="M0 250 V200 C60 196 100 186 150 190 C190 194 210 194 250 190 C300 186 340 196 400 200 V250Z" fill="var(--eau)"/>
+<path d="M150 204 q50 -10 100 0" stroke="var(--eau-2)" stroke-width="6" fill="none" stroke-linecap="round"/>
+<path d="M200 44 C192 32 176 38 182 50 C186 58 200 66 200 66 C200 66 214 58 218 50 C224 38 208 32 200 44Z" fill="#F07A7A"/>
+</svg>
+          <h2 id="merci-titre" tabindex="-1">C'est noté, ta loutre t'attend</h2>
+          <p class="chapo">Tu feras partie des premières personnes prévenues du lancement, avec ton offre membre fondateur. Une loutre ne flotte jamais seule : partage Ottle à quelqu'un dont tu aimerais tenir la main.</p>
+          <button class="bouton" type="button" id="partager">Copier le lien à partager</button>
+          <p id="copie" role="status"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="faq" aria-labelledby="titre-faq">
+    <svg class="remous" style="top:-1px" viewBox="0 0 1440 26" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M0 0H1440V12C1300 26 1180 2 1040 14 C900 26 780 4 640 16 C500 26 380 2 240 14 C140 22 60 16 0 10Z" fill="var(--eau)"/></svg>
+    <div class="conteneur">
+      <h2 id="titre-faq">Tes questions</h2>
+      <div class="liste">
+        <details><summary>C'est gratuit ?</summary><p>Oui. Tout ce qui sert à prendre soin de toi restera gratuit, pour toujours. Une version premium permettra de soutenir l'appli et de débloquer des petits plaisirs pour ta loutre (objets, couleurs, décorations). Les personnes inscrites auront une offre membre fondateur réservée.</p></details>
+        <details><summary>C'est pour qui ?</summary><p>Pour toutes celles et ceux pour qui prendre soin de soi demande un effort : étudiantes et étudiants à bout, personnes TDAH, ou simplement les journées où tout paraît lourd.</p></details>
+        <details><summary>Est-ce que ça remplace un suivi psy ?</summary><p>Non. Ottle t'aide à prendre de bonnes habitudes au quotidien, mais ce n'est pas un outil médical. Si tu traverses un moment difficile, parles-en à un professionnel ou appelle le 3114 (numéro national de prévention du suicide, gratuit, 24h/24).</p></details>
+        <details><summary>Quand sort l'appli ?</summary><p>En 2027. Les personnes inscrites sur la liste d'attente pourront la tester en premier.</p></details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="conteneur">
+    <p>Ottle · Une appli de bien-être, pas un dispositif médical</p>
+    <p><a href="mailto:ottle.app@gmail.com">ottle.app@gmail.com</a></p>
+  </div>
+</footer>
+
+<div class="barre-cta" id="barre-cta" aria-hidden="true"><a class="bouton" href="#inscription" tabindex="-1">Je veux ma loutre</a></div>
+
+<script>
+  /* Formulaire Tally (le même que la page principale) */
+  const TALLY_FORM_ID = "ArpoAo";
+  /* Cette page s'appelle "v3" : dans Tally, la colonne "variante" affiche v3a, v3b ou v3c
+     pour distinguer les inscriptions venues de cette page. */
+  const PAGE = "v3";
+
+  /* Test A/B des titres : ajoute ?v=b ou ?v=c à l'adresse de la page. */
+  const TITRES = {
+    a: "L'appli où ta loutre grandit quand tu prends soin de toi",
+    b: "Une petite loutre pour t'aider à prendre soin de toi",
+    c: "Ici, on flotte à plusieurs"
+  };
+  let variante = "a";
+  try {
+    const v = new URLSearchParams(location.search).get("v");
+    if (v && TITRES[v.toLowerCase()]) variante = v.toLowerCase();
+  } catch (e) {}
+  document.getElementById("titre").textContent = TITRES[variante];
+
+  (() => {
+    const zone = document.getElementById("tally-zone");
+    zone.innerHTML = '<iframe data-tally-src="https://tally.so/embed/' + TALLY_FORM_ID +
+      '?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1&variante=' + PAGE + variante +
+      '" height="560" title="Inscription à la liste d\'attente Ottle"></iframe>';
+    /* Secours : si le script de Tally ne se charge pas (bloqueur, aperçu hors ligne…),
+       on affiche le formulaire directement, avec une hauteur fixe. */
+    const iframe = zone.querySelector("iframe");
+    const secours = () => {
+      if (!iframe.getAttribute("src")) { iframe.src = iframe.dataset.tallySrc; iframe.height = 620; }
+      document.getElementById("sans-tally").hidden = false;
+    };
+    const s = document.createElement("script");
+    s.src = "https://tally.so/widgets/embed.js";
+    s.onload = () => { if (window.Tally) Tally.loadEmbeds(); else secours(); };
+    s.onerror = secours;
+    document.body.appendChild(s);
+    setTimeout(() => { if (!window.Tally) secours(); }, 4000);
+  })();
+
+  /* Après l'inscription : message de remerciement avec les deux loutres */
+  function afficherMerci() {
+    document.getElementById("bloc-form").style.display = "none";
+    document.getElementById("merci").style.display = "block";
+    document.getElementById("merci-titre").focus();
+  }
+  window.addEventListener("message", e => {
+    try {
+      if (!/(^|\.)tally\.so$/.test(new URL(e.origin).hostname)) return;
+      let d = e.data;
+      if (typeof d === "string") { if (d.indexOf("Tally.FormSubmitted") === -1) return; d = JSON.parse(d); }
+      if (d && d.event === "Tally.FormSubmitted") afficherMerci();
+    } catch (err) {}
+  });
+  document.getElementById("partager").addEventListener("click", async () => {
+    const msg = document.getElementById("copie");
+    const lien = location.href.split("#")[0].split("?")[0];
+    try { await navigator.clipboard.writeText(lien); msg.textContent = "Lien copié, tu n'as plus qu'à le coller"; }
+    catch (e) { msg.textContent = "Copie ce lien : " + lien; }
+  });
+
+  /* Barre d'inscription collante sur téléphone : visible après l'en-tête, cachée près du formulaire */
+  (() => {
+    const barre = document.getElementById("barre-cta");
+    const lien = barre.querySelector("a");
+    if (!("IntersectionObserver" in window)) return;
+    let horsEntete = false, formVisible = false;
+    const maj = () => {
+      const montrer = horsEntete && !formVisible;
+      barre.classList.toggle("visible", montrer);
+      barre.setAttribute("aria-hidden", montrer ? "false" : "true");
+      lien.tabIndex = montrer ? 0 : -1;
+    };
+    new IntersectionObserver(([e]) => { horsEntete = !e.isIntersecting && e.boundingClientRect.top < 0; maj(); })
+      .observe(document.querySelector(".heros .bouton"));
+    new IntersectionObserver(([e]) => { formVisible = e.isIntersecting || e.boundingClientRect.top < 0; maj(); }, { rootMargin: "0px 0px -15% 0px" })
+      .observe(document.getElementById("inscription"));
+  })();
+</script>
+</body>
+</html>
